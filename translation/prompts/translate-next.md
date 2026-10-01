@@ -1,45 +1,18 @@
 # Prompt: Translate one complete page
 
-Mỗi invocation của prompt này xử lý **đúng một bài hoàn chỉnh**.
+Mỗi invocation xử lý đúng một bài.
 
-## Input unit
+## Agent chỉ cần
 
-Source là một file `README_EN.md` của một bài.
+1. Đọc `translation/RULE.md`.
+2. Đọc toàn bộ `README_EN.md` của bài.
+3. Dịch toàn bộ page sang `vi/.../README.md`.
+4. Đọc lại target nhanh một lượt rồi kết thúc.
 
-Target là file `vi/.../README.md` tương ứng.
+Không đọc thêm `PROJECT_RULES.md`, `GLOSSARY.md`, review prompt, state/report files trừ khi task đặc biệt yêu cầu.
 
-## Contract
+Không chạy prettier hoặc check script mặc định ở worker. Validation chạy theo batch/CI.
 
-Agent phải:
+Không tạo task phụ như `Translate comments 0004`; một agent chịu trách nhiệm toàn bộ page được giao.
 
-1. đọc toàn bộ source page;
-2. dịch toàn bộ prose cần dịch của page;
-3. giữ nguyên code, code comments, identifiers, math, URL, front matter và các protected literal;
-4. viết hoàn chỉnh target page;
-5. quick-review source ↔ target;
-6. chạy mechanical check cần thiết;
-7. kết thúc task của bài đó.
-
-## Không được chia nhỏ ownership
-
-Không tạo task phụ kiểu:
-
-- Translate comments 0004;
-- Translate headings 0004;
-- Translate description 0004;
-- Translate solution 0004.
-
-Nếu bài là 0004 thì agent được giao 0004 phải chịu trách nhiệm toàn bộ page 0004.
-
-Code comments mặc định không dịch và không phải một translation unit riêng.
-
-## Batch behavior
-
-Khi có nhiều agent:
-
-- mỗi agent nhận một problem/page khác nhau;
-- không hai agent cùng sửa một target file;
-- 20 agents = tối đa 20 pages song song;
-- agent xong page nào thì trả page đó, không tạo report/hash/state.
-
-Tuân thủ `translation/RULE.md`, `translation/PROJECT_RULES.md` và `translation/GLOSSARY.md`.
+Code comments mặc định giữ nguyên.
