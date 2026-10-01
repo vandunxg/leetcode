@@ -13,13 +13,13 @@ tags:
 
 [中文文档](/solution/0200-0299/0271.Encode%20and%20Decode%20Strings/README.md)
 
-## Description
+## Mô tả
 
 <!-- description:start -->
 
-<p>Design an algorithm to encode <b>a list of strings</b> to <b>a string</b>. The encoded string is then sent over the network and is decoded back to the original list of strings.</p>
+<p>Thiết kế thuật toán để mã hóa <b>một danh sách chuỗi</b> thành <b>một chuỗi</b>. Chuỗi đã mã hóa được gửi qua network rồi giải mã để khôi phục danh sách chuỗi ban đầu.</p>
 
-<p>Machine 1 (sender) has the function:</p>
+<p>Máy 1 (bên gửi) có hàm:</p>
 
 <pre>
 string encode(vector&lt;string&gt; strs) {
@@ -27,7 +27,7 @@ string encode(vector&lt;string&gt; strs) {
   return encoded_string;
 }</pre>
 
-Machine 2 (receiver) has the function:
+Máy 2 (bên nhận) có hàm:
 
 <pre>
 vector&lt;string&gt; decode(string s) {
@@ -36,83 +36,83 @@ vector&lt;string&gt; decode(string s) {
 }
 </pre>
 
-<p>So Machine 1 does:</p>
+<p>Máy 1 thực hiện:</p>
 
 <pre>
 string encoded_string = encode(strs);
 </pre>
 
-<p>and Machine 2 does:</p>
+<p>còn Máy 2 thực hiện:</p>
 
 <pre>
 vector&lt;string&gt; strs2 = decode(encoded_string);
 </pre>
 
-<p><code>strs2</code> in Machine 2 should be the same as <code>strs</code> in Machine 1.</p>
+<p><code>strs2</code> ở Máy 2 phải giống với <code>strs</code> ở Máy 1.</p>
 
-<p>Implement the <code>encode</code> and <code>decode</code> methods.</p>
+<p>Hãy triển khai các method <code>encode</code> và <code>decode</code>.</p>
 
-<p>You are not allowed to&nbsp;solve the problem using any serialize methods (such as <code>eval</code>).</p>
+<p>Không được giải bài toán bằng các method serialize (chẳng hạn như <code>eval</code>).</p>
 
 <p>&nbsp;</p>
-<p><strong class="example">Example 1:</strong></p>
+<p><strong class="example">Ví dụ 1:</strong></p>
 
 <pre>
-<strong>Input:</strong> dummy_input = [&quot;Hello&quot;,&quot;World&quot;]
-<strong>Output:</strong> [&quot;Hello&quot;,&quot;World&quot;]
-<strong>Explanation:</strong>
-Machine 1:
+<strong>Đầu vào:</strong> dummy_input = [&quot;Hello&quot;,&quot;World&quot;]
+<strong>Đầu ra:</strong> [&quot;Hello&quot;,&quot;World&quot;]
+<strong>Giải thích:</strong>
+Máy 1:
 Codec encoder = new Codec();
 String msg = encoder.encode(strs);
-Machine 1 ---msg---&gt; Machine 2
+Máy 1 ---msg---&gt; Máy 2
 
-Machine 2:
+Máy 2:
 Codec decoder = new Codec();
 String[] strs = decoder.decode(msg);
 </pre>
 
-<p><strong class="example">Example 2:</strong></p>
+<p><strong class="example">Ví dụ 2:</strong></p>
 
 <pre>
-<strong>Input:</strong> dummy_input = [&quot;&quot;]
-<strong>Output:</strong> [&quot;&quot;]
+<strong>Đầu vào:</strong> dummy_input = [&quot;&quot;]
+<strong>Đầu ra:</strong> [&quot;&quot;]
 </pre>
 
 <p>&nbsp;</p>
-<p><strong>Constraints:</strong></p>
+<p><strong>Ràng buộc:</strong></p>
 
 <ul>
 	<li><code>1 &lt;= strs.length &lt;= 200</code></li>
 	<li><code>0 &lt;= strs[i].length &lt;= 200</code></li>
-	<li><code>strs[i]</code> contains any possible characters out of <code>256</code> valid ASCII characters.</li>
+	<li><code>strs[i]</code> có thể chứa bất kỳ ký tự nào trong số <code>256</code> ký tự ASCII hợp lệ.</li>
 </ul>
 
 <p>&nbsp;</p>
-<p><strong>Follow up: </strong>Could you write a generalized algorithm to work on any possible set of characters?</p>
+<p><strong>Câu hỏi mở rộng: </strong>Bạn có thể viết thuật toán tổng quát hoạt động với mọi tập ký tự có thể có không?</p>
 
 <!-- description:end -->
 
-## Solutions
+## Lời giải
 
 <!-- solution:start -->
 
-### Solution 1: Encode String Length
+### Lời giải 1: Mã hóa độ dài chuỗi
 
 <!-- thinking:start -->
 
-> **Thinking**
+> **Tư duy**
 >
-> A raw delimiter can appear inside a string. Prefixing a fixed-width length makes the split unambiguous.
+> Một delimiter đơn lẻ có thể xuất hiện bên trong chuỗi. Thêm độ dài có độ rộng cố định ở đầu giúp xác định ranh giới chuỗi một cách rõ ràng.
 >
-> Encode writes a $4$-character length then the payload; decode reads that length and slices.
+> Encode ghi độ dài gồm $4$ ký tự rồi đến payload; decode đọc độ dài đó và cắt chuỗi tương ứng.
 
 <!-- thinking:end -->
 
-During encoding, we convert the length of the string into a fixed 4-digit string, add the string itself, and append it to the result string in sequence.
+Khi mã hóa, ta chuyển độ dài của chuỗi thành một chuỗi cố định gồm 4 chữ số, ghép với chính chuỗi đó rồi lần lượt nối vào chuỗi kết quả.
 
-During decoding, we first take the first four digits of the string to get the length, and then cut the following string according to the length. We cut it in sequence until we get the list of strings.
+Khi giải mã, trước tiên ta lấy bốn chữ số đầu của chuỗi để biết độ dài, rồi cắt phần chuỗi tiếp theo theo độ dài đó. Lặp lại cho đến khi thu được danh sách chuỗi.
 
-The time complexity is $O(n)$.
+Độ phức tạp thời gian là $O(n)$.
 
 <!-- tabs:start -->
 
