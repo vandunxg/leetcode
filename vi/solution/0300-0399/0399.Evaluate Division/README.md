@@ -1,0 +1,409 @@
+---
+comments: true
+difficulty: Medium
+tags:
+    - Depth-First Search
+    - Breadth-First Search
+    - Union Find
+    - Graph
+    - Array
+    - String
+    - Shortest Path
+    - Floyd–Warshall
+    - Bellman–Ford
+---
+
+<!-- problem:start -->
+
+# [399. Evaluate Division](https://leetcode.com/problems/evaluate-division)
+
+[中文文档](/solution/0300-0399/0399.Evaluate%20Division/README.md)
+
+## Mô tả
+
+<!-- description:start -->
+
+<p>Cho mảng các cặp biến <code>equations</code> và mảng số thực <code>values</code>, trong đó <code>equations[i] = [A<sub>i</sub>, B<sub>i</sub>]</code> và <code>values[i]</code> biểu diễn phương trình <code>A<sub>i</sub> / B<sub>i</sub> = values[i]</code>. Mỗi <code>A<sub>i</sub></code> hoặc <code>B<sub>i</sub></code> là một chuỗi đại diện cho một biến.</p>
+
+<p>Ta cũng có mảng <code>queries</code>, trong đó <code>queries[j] = [C<sub>j</sub>, D<sub>j</sub>]</code> biểu diễn truy vấn thứ <code>j<sup>th</sup></code>, yêu cầu tìm kết quả của <code>C<sub>j</sub> / D<sub>j</sub> = ?</code>.</p>
+
+<p>Trả về kết quả của tất cả truy vấn. Nếu không thể xác định một kết quả nào đó, hãy trả về <code>-1.0</code>.</p>
+
+<p><strong>Lưu ý:</strong> Đầu vào luôn hợp lệ. Có thể giả sử rằng khi tính các truy vấn sẽ không xảy ra phép chia cho 0 và không có mâu thuẫn.</p>
+
+<p><strong>Lưu ý:&nbsp;</strong>Các biến không xuất hiện trong danh sách phương trình được xem là chưa xác định, nên không thể tính kết quả cho chúng.</p>
+
+<p>&nbsp;</p>
+<p><strong class="example">Ví dụ 1:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> equations = [[&quot;a&quot;,&quot;b&quot;],[&quot;b&quot;,&quot;c&quot;]], values = [2.0,3.0], queries = [[&quot;a&quot;,&quot;c&quot;],[&quot;b&quot;,&quot;a&quot;],[&quot;a&quot;,&quot;e&quot;],[&quot;a&quot;,&quot;a&quot;],[&quot;x&quot;,&quot;x&quot;]]
+<strong>Đầu ra:</strong> [6.00000,0.50000,-1.00000,1.00000,-1.00000]
+<strong>Giải thích:</strong> 
+Cho: <em>a / b = 2.0</em>, <em>b / c = 3.0</em>
+các truy vấn là: <em>a / c = ?</em>, <em>b / a = ?</em>, <em>a / e = ?</em>, <em>a / a = ?</em>, <em>x / x = ? </em>
+kết quả: [6.0, 0.5, -1.0, 1.0, -1.0 ]
+lưu ý: x chưa được xác định =&gt; -1.0</pre>
+
+<p><strong class="example">Ví dụ 2:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> equations = [[&quot;a&quot;,&quot;b&quot;],[&quot;b&quot;,&quot;c&quot;],[&quot;bc&quot;,&quot;cd&quot;]], values = [1.5,2.5,5.0], queries = [[&quot;a&quot;,&quot;c&quot;],[&quot;c&quot;,&quot;b&quot;],[&quot;bc&quot;,&quot;cd&quot;],[&quot;cd&quot;,&quot;bc&quot;]]
+<strong>Đầu ra:</strong> [3.75000,0.40000,5.00000,0.20000]
+</pre>
+
+<p><strong class="example">Ví dụ 3:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> equations = [[&quot;a&quot;,&quot;b&quot;]], values = [0.5], queries = [[&quot;a&quot;,&quot;b&quot;],[&quot;b&quot;,&quot;a&quot;],[&quot;a&quot;,&quot;c&quot;],[&quot;x&quot;,&quot;y&quot;]]
+<strong>Đầu ra:</strong> [0.50000,2.00000,-1.00000,-1.00000]
+</pre>
+
+<p>&nbsp;</p>
+<p><strong>Ràng buộc:</strong></p>
+
+<ul>
+	<li><code>1 &lt;= equations.length &lt;= 20</code></li>
+	<li><code>equations[i].length == 2</code></li>
+	<li><code>1 &lt;= A<sub>i</sub>.length, B<sub>i</sub>.length &lt;= 5</code></li>
+	<li><code>values.length == equations.length</code></li>
+	<li><code>0.0 &lt; values[i] &lt;= 20.0</code></li>
+	<li><code>1 &lt;= queries.length &lt;= 20</code></li>
+	<li><code>queries[i].length == 2</code></li>
+	<li><code>1 &lt;= C<sub>j</sub>.length, D<sub>j</sub>.length &lt;= 5</code></li>
+	<li><code>A<sub>i</sub>, B<sub>i</sub>, C<sub>j</sub>, D<sub>j</sub></code> chỉ gồm chữ cái tiếng Anh viết thường và chữ số.</li>
+</ul>
+
+<!-- description:end -->
+
+## Lời giải
+
+<!-- solution:start -->
+
+### Solution 1
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Biết các giá trị $a/b$, ta cần tính những tỉ số khác. Duyệt graph sẽ nhân các trọng số dọc theo một đường đi; weighted union-find gọn hơn khi có nhiều biến.
+>
+> $w[x]$ biểu diễn tỉ số của $x$ so với root của nó. Khi nén đường đi, `find` nhân các trọng số tương ứng. Khi gộp theo phương trình $a/b=v$, ta đặt $w[pa]=w[b]\cdot v/w[a]$. Truy vấn trả về $-1$ nếu thiếu biến hoặc hai biến thuộc các component khác nhau; nếu không, kết quả là $w[c]/w[d]$.
+
+<!-- thinking:end -->
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+class Solution:
+    def calcEquation(
+        self, equations: List[List[str]], values: List[float], queries: List[List[str]]
+    ) -> List[float]:
+        def find(x):
+            if p[x] != x:
+                origin = p[x]
+                p[x] = find(p[x])
+                w[x] *= w[origin]
+            return p[x]
+
+        w = defaultdict(lambda: 1)
+        p = defaultdict()
+        for a, b in equations:
+            p[a], p[b] = a, b
+        for i, v in enumerate(values):
+            a, b = equations[i]
+            pa, pb = find(a), find(b)
+            if pa == pb:
+                continue
+            p[pa] = pb
+            w[pa] = w[b] * v / w[a]
+        return [
+            -1 if c not in p or d not in p or find(c) != find(d) else w[c] / w[d]
+            for c, d in queries
+        ]
+```
+
+#### Java
+
+```java
+class Solution {
+    private Map<String, String> p;
+    private Map<String, Double> w;
+
+    public double[] calcEquation(
+        List<List<String>> equations, double[] values, List<List<String>> queries) {
+        int n = equations.size();
+        p = new HashMap<>();
+        w = new HashMap<>();
+        for (List<String> e : equations) {
+            p.put(e.get(0), e.get(0));
+            p.put(e.get(1), e.get(1));
+            w.put(e.get(0), 1.0);
+            w.put(e.get(1), 1.0);
+        }
+        for (int i = 0; i < n; ++i) {
+            List<String> e = equations.get(i);
+            String a = e.get(0), b = e.get(1);
+            String pa = find(a), pb = find(b);
+            if (Objects.equals(pa, pb)) {
+                continue;
+            }
+            p.put(pa, pb);
+            w.put(pa, w.get(b) * values[i] / w.get(a));
+        }
+        int m = queries.size();
+        double[] ans = new double[m];
+        for (int i = 0; i < m; ++i) {
+            String c = queries.get(i).get(0), d = queries.get(i).get(1);
+            ans[i] = !p.containsKey(c) || !p.containsKey(d) || !Objects.equals(find(c), find(d))
+                ? -1.0
+                : w.get(c) / w.get(d);
+        }
+        return ans;
+    }
+
+    private String find(String x) {
+        if (!Objects.equals(p.get(x), x)) {
+            String origin = p.get(x);
+            p.put(x, find(p.get(x)));
+            w.put(x, w.get(x) * w.get(origin));
+        }
+        return p.get(x);
+    }
+}
+```
+
+#### C++
+
+```cpp
+class Solution {
+public:
+    unordered_map<string, string> p;
+    unordered_map<string, double> w;
+
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+        int n = equations.size();
+        for (auto e : equations) {
+            p[e[0]] = e[0];
+            p[e[1]] = e[1];
+            w[e[0]] = 1.0;
+            w[e[1]] = 1.0;
+        }
+        for (int i = 0; i < n; ++i) {
+            vector<string> e = equations[i];
+            string a = e[0], b = e[1];
+            string pa = find(a), pb = find(b);
+            if (pa == pb) continue;
+            p[pa] = pb;
+            w[pa] = w[b] * values[i] / w[a];
+        }
+        int m = queries.size();
+        vector<double> ans(m);
+        for (int i = 0; i < m; ++i) {
+            string c = queries[i][0], d = queries[i][1];
+            ans[i] = p.find(c) == p.end() || p.find(d) == p.end() || find(c) != find(d) ? -1.0 : w[c] / w[d];
+        }
+        return ans;
+    }
+
+    string find(string x) {
+        if (p[x] != x) {
+            string origin = p[x];
+            p[x] = find(p[x]);
+            w[x] *= w[origin];
+        }
+        return p[x];
+    }
+};
+```
+
+#### Go
+
+```go
+func calcEquation(equations [][]string, values []float64, queries [][]string) []float64 {
+	p := make(map[string]string)
+	w := make(map[string]float64)
+	for _, e := range equations {
+		a, b := e[0], e[1]
+		p[a], p[b] = a, b
+		w[a], w[b] = 1.0, 1.0
+	}
+
+	var find func(x string) string
+	find = func(x string) string {
+		if p[x] != x {
+			origin := p[x]
+			p[x] = find(p[x])
+			w[x] *= w[origin]
+		}
+		return p[x]
+	}
+
+	for i, v := range values {
+		a, b := equations[i][0], equations[i][1]
+		pa, pb := find(a), find(b)
+		if pa == pb {
+			continue
+		}
+		p[pa] = pb
+		w[pa] = w[b] * v / w[a]
+	}
+	var ans []float64
+	for _, e := range queries {
+		c, d := e[0], e[1]
+		if p[c] == "" || p[d] == "" || find(c) != find(d) {
+			ans = append(ans, -1.0)
+		} else {
+			ans = append(ans, w[c]/w[d])
+		}
+	}
+	return ans
+}
+```
+
+#### Rust
+
+```rust
+use std::collections::HashMap;
+
+#[derive(Debug)]
+pub struct DSUNode {
+    parent: String,
+    weight: f64,
+}
+
+pub struct DisjointSetUnion {
+    nodes: HashMap<String, DSUNode>,
+}
+
+impl DisjointSetUnion {
+    pub fn new(equations: &Vec<Vec<String>>) -> DisjointSetUnion {
+        let mut nodes = HashMap::new();
+        for equation in equations.iter() {
+            for iter in equation.iter() {
+                nodes.insert(
+                    iter.clone(),
+                    DSUNode {
+                        parent: iter.clone(),
+                        weight: 1.0,
+                    },
+                );
+            }
+        }
+        DisjointSetUnion { nodes }
+    }
+
+    pub fn find(&mut self, v: &String) -> String {
+        let origin = self.nodes[v].parent.clone();
+        if origin == *v {
+            return origin;
+        }
+
+        let root = self.find(&origin);
+        self.nodes.get_mut(v).unwrap().parent = root.clone();
+        self.nodes.get_mut(v).unwrap().weight *= self.nodes[&origin].weight;
+        root
+    }
+
+    pub fn union(&mut self, a: &String, b: &String, v: f64) {
+        let pa = self.find(a);
+        let pb = self.find(b);
+        if pa == pb {
+            return;
+        }
+        let (wa, wb) = (self.nodes[a].weight, self.nodes[b].weight);
+        self.nodes.get_mut(&pa).unwrap().parent = pb;
+        self.nodes.get_mut(&pa).unwrap().weight = (wb * v) / wa;
+    }
+
+    pub fn exist(&mut self, k: &String) -> bool {
+        self.nodes.contains_key(k)
+    }
+
+    pub fn calc_value(&mut self, a: &String, b: &String) -> f64 {
+        if !self.exist(a) || !self.exist(b) || self.find(a) != self.find(b) {
+            -1.0
+        } else {
+            let wa = self.nodes[a].weight;
+            let wb = self.nodes[b].weight;
+            wa / wb
+        }
+    }
+}
+
+impl Solution {
+    pub fn calc_equation(
+        equations: Vec<Vec<String>>,
+        values: Vec<f64>,
+        queries: Vec<Vec<String>>,
+    ) -> Vec<f64> {
+        let mut dsu = DisjointSetUnion::new(&equations);
+        for (i, &v) in values.iter().enumerate() {
+            let (a, b) = (&equations[i][0], &equations[i][1]);
+            dsu.union(a, b, v);
+        }
+
+        let mut ans = vec![];
+        for querie in queries {
+            let (c, d) = (&querie[0], &querie[1]);
+            ans.push(dsu.calc_value(c, d));
+        }
+        ans
+    }
+}
+```
+
+#### TypeScript
+
+```ts
+function calcEquation(equations: string[][], values: number[], queries: string[][]): number[] {
+    const g: Record<string, [string, number][]> = {};
+    const ans = Array.from({ length: queries.length }, () => -1);
+
+    for (let i = 0; i < equations.length; i++) {
+        const [a, b] = equations[i];
+        (g[a] ??= []).push([b, values[i]]);
+        (g[b] ??= []).push([a, 1 / values[i]]);
+    }
+
+    for (let i = 0; i < queries.length; i++) {
+        const [c, d] = queries[i];
+        const vis = new Set<string>();
+        const q: [string, number][] = [[c, 1]];
+
+        if (!g[c] || !g[d]) continue;
+        if (c === d) {
+            ans[i] = 1;
+            continue;
+        }
+
+        for (const [current, v] of q) {
+            if (vis.has(current)) continue;
+            vis.add(current);
+
+            for (const [intermediate, multiplier] of g[current]) {
+                if (vis.has(intermediate)) continue;
+
+                if (intermediate === d) {
+                    ans[i] = v * multiplier;
+                    break;
+                }
+
+                q.push([intermediate, v * multiplier]);
+            }
+
+            if (ans[i] !== -1) break;
+        }
+    }
+
+    return ans;
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- problem:end -->
