@@ -1,0 +1,418 @@
+---
+comments: true
+difficulty: Medium
+---
+
+<!-- problem:start -->
+
+# [04.05. Legal Binary Search Tree](https://leetcode.cn/problems/legal-binary-search-tree-lcci)
+
+[中文文档](/lcci/04.05.Legal%20Binary%20Search%20Tree/README.md)
+
+## Mô tả
+
+<!-- description:start -->
+
+<p>Hãy triển khai một hàm để kiểm tra xem một cây nhị phân có phải là binary search tree hay không.</p>
+
+<p><strong>Ví dụ&nbsp;1:</strong></p>
+
+<pre>
+
+<strong>Input:</strong>
+
+    2
+
+   / \
+
+  1   3
+
+<strong>Output:</strong> true
+
+</pre>
+
+<p><strong>Ví dụ&nbsp;2:</strong></p>
+
+<pre>
+
+<strong>Input:</strong>
+
+    5
+
+   / \
+
+  1   4
+
+&nbsp;    / \
+&nbsp;   3   6
+
+<strong>Output:</strong> false
+
+<strong>Giải thích:</strong> Input: [5,1,4,null,null,3,6].
+
+&nbsp;    giá trị của node gốc là 5, nhưng node con bên phải có giá trị 4.</pre>
+
+<!-- description:end -->
+
+## Lời giải
+
+<!-- solution:start -->
+
+### Lời giải 1: Đệ quy
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Chỉ so sánh một node với các node con sẽ bỏ sót những ràng buộc kéo dài qua nhiều tầng, chẳng hạn mọi key trong cây con bên phải phải lớn hơn node gốc.
+>
+> Inorder của BST là một dãy tăng dần nghiêm ngặt, vì vậy ở mỗi lần duyệt, ta chỉ cần so sánh với giá trị trước đó.
+>
+> $prev$ bắt đầu từ $-\infty$; sau khi duyệt cây con bên trái hợp lệ, yêu cầu $prev < root.val$, cập nhật $prev$, rồi chuyển sang bên phải. Không cần lưu một sequence tường minh.
+
+<!-- thinking:end -->
+
+Ta có thể thực hiện inorder traversal đệ quy trên cây nhị phân. Nếu kết quả traversal tăng dần nghiêm ngặt, thì cây này là một binary search tree.
+
+Vì vậy, ta dùng biến `prev` để lưu node cuối cùng đã duyệt. Ban đầu, `prev = -∞`. Sau đó ta đệ quy duyệt cây con bên trái. Nếu cây con bên trái không phải là binary search tree, ta trả về `False` ngay. Nếu không, ta kiểm tra xem giá trị của node hiện tại có lớn hơn `prev` hay không. Nếu không, ta trả về `False`. Nếu có, ta cập nhật `prev` thành giá trị của node hiện tại, rồi đệ quy duyệt cây con bên phải.
+
+Độ phức tạp thời gian là $O(n)$, độ phức tạp không gian là $O(n)$. Trong đó $n$ là số node trong cây nhị phân.
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        def dfs(root: Optional[TreeNode]) -> bool:
+            if root is None:
+                return True
+            if not dfs(root.left):
+                return False
+            nonlocal prev
+            if prev >= root.val:
+                return False
+            prev = root.val
+            return dfs(root.right)
+
+        prev = -inf
+        return dfs(root)
+```
+
+#### Java
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    private TreeNode prev;
+
+    public boolean isValidBST(TreeNode root) {
+        return dfs(root);
+    }
+
+    private boolean dfs(TreeNode root) {
+        if (root == null) {
+            return true;
+        }
+        if (!dfs(root.left)) {
+            return false;
+        }
+        if (prev != null && prev.val >= root.val) {
+            return false;
+        }
+        prev = root;
+        return dfs(root.right);
+    }
+}
+```
+
+#### C++
+
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        TreeNode* prev = nullptr;
+        function<bool(TreeNode*)> dfs = [&](TreeNode* root) {
+            if (!root) {
+                return true;
+            }
+            if (!dfs(root->left)) {
+                return false;
+            }
+            if (prev && prev->val >= root->val) {
+                return false;
+            }
+            prev = root;
+            return dfs(root->right);
+        };
+        return dfs(root);
+    }
+};
+```
+
+#### Go
+
+```go
+/**
+ * Definition for a binary tree node.
+ * type TreeNode struct {
+ *     Val int
+ *     Left *TreeNode
+ *     Right *TreeNode
+ * }
+ */
+func isValidBST(root *TreeNode) bool {
+    var prev *TreeNode
+    var dfs func(*TreeNode) bool
+    dfs = func(root *TreeNode) bool {
+        if root == nil {
+            return true
+        }
+        if !dfs(root.Left) {
+            return false
+        }
+        if prev != nil && prev.Val >= root.Val {
+            return false
+        }
+        prev = root
+        return dfs(root.Right)
+    }
+    return dfs(root)
+}
+```
+
+#### TypeScript
+
+```ts
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     val: number
+ *     left: TreeNode | null
+ *     right: TreeNode | null
+ *     constructor(val?: number, left?: TreeNode | null, right?: TreeNode | null) {
+ *         this.val = (val===undefined ? 0 : val)
+ *         this.left = (left===undefined ? null : left)
+ *         this.right = (right===undefined ? null : right)
+ *     }
+ * }
+ */
+
+function isValidBST(root: TreeNode | null): boolean {
+    let prev: TreeNode | null = null;
+    const dfs = (root: TreeNode | null): boolean => {
+        if (!root) {
+            return true;
+        }
+        if (!dfs(root.left)) {
+            return false;
+        }
+        if (prev && prev.val >= root.val) {
+            return false;
+        }
+        prev = root;
+        return dfs(root.right);
+    };
+    return dfs(root);
+}
+```
+
+#### Rust
+
+```rust
+// Definition for a binary tree node.
+// #[derive(Debug, PartialEq, Eq)]
+// pub struct TreeNode {
+//   pub val: i32,
+//   pub left: Option<Rc<RefCell<TreeNode>>>,
+//   pub right: Option<Rc<RefCell<TreeNode>>>,
+// }
+//
+// impl TreeNode {
+//   #[inline]
+//   pub fn new(val: i32) -> Self {
+//     TreeNode {
+//       val,
+//       left: None,
+//       right: None
+//     }
+//   }
+// }
+use std::cell::RefCell;
+use std::rc::Rc;
+impl Solution {
+    fn dfs(root: &Option<Rc<RefCell<TreeNode>>>, prev: &mut Option<i32>) -> bool {
+        if root.is_none() {
+            return true;
+        }
+        let root = root.as_ref().unwrap().borrow();
+        if !Self::dfs(&root.left, prev) {
+            return false;
+        }
+        if prev.is_some() && prev.unwrap() >= root.val {
+            return false;
+        }
+        *prev = Some(root.val);
+        Self::dfs(&root.right, prev)
+    }
+
+    pub fn is_valid_bst(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
+        Self::dfs(&root, &mut None)
+    }
+}
+```
+
+#### JavaScript
+
+```js
+/**
+ * Definition for a binary tree node.
+ * function TreeNode(val, left, right) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.left = (left===undefined ? null : left)
+ *     this.right = (right===undefined ? null : right)
+ * }
+ */
+/**
+ * @param {TreeNode} root
+ * @return {boolean}
+ */
+var isValidBST = function (root) {
+    let prev = null;
+    const dfs = root => {
+        if (!root) {
+            return true;
+        }
+        if (!dfs(root.left)) {
+            return false;
+        }
+        if (prev && prev.val >= root.val) {
+            return false;
+        }
+        prev = root;
+        return dfs(root.right);
+    };
+    return dfs(root);
+};
+```
+
+#### C#
+
+```cs
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     public int val;
+ *     public TreeNode left;
+ *     public TreeNode right;
+ *     public TreeNode(int val=0, TreeNode left=null, TreeNode right=null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+public class Solution {
+    private TreeNode prev;
+
+    public bool IsValidBST(TreeNode root) {
+        return dfs(root);
+    }
+
+    private bool dfs(TreeNode root) {
+        if (root == null) {
+            return true;
+        }
+        if (!dfs(root.left)) {
+            return false;
+        }
+        if (prev != null && prev.val >= root.val) {
+            return false;
+        }
+        prev = root;
+        return dfs(root.right);
+    }
+}
+```
+
+#### Swift
+
+```swift
+/* class TreeNode {
+*    var val: Int
+*    var left: TreeNode?
+*    var right: TreeNode?
+*
+*    init(_ val: Int) {
+*        self.val = val
+*        self.left = nil
+*        self.right = nil
+*    }
+* }
+*/
+
+class Solution {
+    private var prev: TreeNode?
+
+    func isValidBST(_ root: TreeNode?) -> Bool {
+        return dfs(root)
+    }
+
+    private func dfs(_ root: TreeNode?) -> Bool {
+        guard let root = root else {
+            return true
+        }
+
+        if !dfs(root.left) {
+            return false
+        }
+
+        if let prev = prev, prev.val >= root.val {
+            return false
+        }
+
+        prev = root
+
+        return dfs(root.right)
+    }
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- problem:end -->
