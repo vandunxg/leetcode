@@ -1,0 +1,271 @@
+---
+comments: true
+difficulty: Medium
+rating: 2276
+source: Weekly Contest 195 Q3
+tags:
+    - Array
+    - Two Pointers
+    - Binary Search
+    - Sorting
+---
+
+<!-- problem:start -->
+
+# [1498. Number of Subsequences That Satisfy the Given Sum Condition](https://leetcode.com/problems/number-of-subsequences-that-satisfy-the-given-sum-condition)
+
+[中文文档](/solution/1400-1499/1498.Number%20of%20Subsequences%20That%20Satisfy%20the%20Given%20Sum%20Condition/README.md)
+
+## Mô tả
+
+<!-- description:start -->
+
+<p>Cho một mảng số nguyên <code>nums</code> và một số nguyên <code>target</code>.</p>
+
+<p>Hãy trả về <em>số lượng dãy con <strong>không rỗng</strong> của </em><code>nums</code><em> sao cho tổng của phần tử nhỏ nhất và phần tử lớn nhất trong dãy con đó nhỏ hơn hoặc bằng </em><code>target</code>. Vì đáp án có thể rất lớn, hãy trả về kết quả <strong>lấy modulo</strong> <code>10<sup>9</sup> + 7</code>.</p>
+
+<p>&nbsp;</p>
+<p><strong class="example">Ví dụ 1:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> nums = [3,5,6,7], target = 9
+<strong>Đầu ra:</strong> 4
+<strong>Giải thích:</strong> Có 4 dãy con thỏa mãn điều kiện.
+[3] -&gt; Giá trị nhỏ nhất + giá trị lớn nhất &lt;= target (3 + 3 &lt;= 9)
+[3,5] -&gt; (3 + 5 &lt;= 9)
+[3,5,6] -&gt; (3 + 6 &lt;= 9)
+[3,6] -&gt; (3 + 6 &lt;= 9)
+</pre>
+
+<p><strong class="example">Ví dụ 2:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> nums = [3,3,6,8], target = 10
+<strong>Đầu ra:</strong> 6
+<strong>Giải thích:</strong> Có 6 dãy con thỏa mãn điều kiện. (nums có thể chứa các số trùng nhau).
+[3] , [3] , [3,3], [3,6] , [3,6] , [3,3,6]
+</pre>
+
+<p><strong class="example">Ví dụ 3:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> nums = [2,3,3,4,6,7], target = 12
+<strong>Đầu ra:</strong> 61
+<strong>Giải thích:</strong> Có 63 dãy con không rỗng, trong đó có hai dãy không thỏa mãn điều kiện ([6,7], [7]).
+Số dãy con hợp lệ (63 - 2 = 61).
+</pre>
+
+<p>&nbsp;</p>
+<p><strong>Ràng buộc:</strong></p>
+
+<ul>
+	<li><code>1 &lt;= nums.length &lt;= 10<sup>5</sup></code></li>
+	<li><code>1 &lt;= nums[i] &lt;= 10<sup>6</sup></code></li>
+	<li><code>1 &lt;= target &lt;= 10<sup>6</sup></code></li>
+</ul>
+
+<!-- description:end -->
+
+## Lời giải
+
+<!-- solution:start -->
+
+### Lời giải 1: Sắp xếp + Tìm kiếm nhị phân
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Một dãy con chỉ được đánh giá qua giá trị nhỏ nhất và lớn nhất, nên việc sắp xếp không làm thay đổi các cặp giá trị này. $n\le 10^5$. Cố định giá trị nhỏ nhất $nums[i]$, dùng tìm kiếm nhị phân để tìm $nums[j]$ lớn nhất hợp lệ, rồi nhân với $2^{j-i}$ cho các lựa chọn tự do ở giữa.
+>
+> Tính trước các lũy thừa của hai. Khi $2\cdot nums[i]>target$, các giá trị nhỏ nhất lớn hơn đều không thể hợp lệ.
+
+<!-- thinking:end -->
+
+Vì bài toán nói về dãy con và liên quan đến tổng của phần tử nhỏ nhất và lớn nhất, trước tiên ta có thể sắp xếp mảng <em>nums</em>.
+
+Sau đó, ta lần lượt chọn phần tử nhỏ nhất <em>nums[i]</em>. Với mỗi <em>nums[i]</em>, ta có thể tìm phần tử lớn nhất <em>nums[j]</em> trong <em>nums[i + 1]</em> đến <em>nums[n - 1]</em> sao cho <em>nums[i] + nums[j] &le; target</em>. Số dãy con hợp lệ trong trường hợp này là $2^{j - i}$, trong đó $2^{j - i}$ biểu diễn tất cả các dãy con có thể tạo thành từ <em>nums[i + 1]</em> đến <em>nums[j]</em>. Ta cộng số lượng của tất cả các dãy con như vậy.
+
+Độ phức tạp thời gian là $O(n \times \log n)$, còn độ phức tạp không gian là $O(n)$, trong đó $n$ là độ dài của mảng <em>nums</em>.
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+class Solution:
+    def numSubseq(self, nums: List[int], target: int) -> int:
+        mod = 10**9 + 7
+        nums.sort()
+        n = len(nums)
+        f = [1] + [0] * n
+        for i in range(1, n + 1):
+            f[i] = f[i - 1] * 2 % mod
+        ans = 0
+        for i, x in enumerate(nums):
+            if x * 2 > target:
+                break
+            j = bisect_right(nums, target - x, i + 1) - 1
+            ans = (ans + f[j - i]) % mod
+        return ans
+```
+
+#### Java
+
+```java
+class Solution {
+    public int numSubseq(int[] nums, int target) {
+        Arrays.sort(nums);
+        final int mod = (int) 1e9 + 7;
+        int n = nums.length;
+        int[] f = new int[n + 1];
+        f[0] = 1;
+        for (int i = 1; i <= n; ++i) {
+            f[i] = (f[i - 1] * 2) % mod;
+        }
+        int ans = 0;
+        for (int i = 0; i < n && nums[i] * 2 <= target; ++i) {
+            int j = search(nums, target - nums[i], i + 1) - 1;
+            ans = (ans + f[j - i]) % mod;
+        }
+        return ans;
+    }
+
+    private int search(int[] nums, int x, int left) {
+        int right = nums.length;
+        while (left < right) {
+            int mid = (left + right) >> 1;
+            if (nums[mid] > x) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+}
+```
+
+#### C++
+
+```cpp
+class Solution {
+public:
+    int numSubseq(vector<int>& nums, int target) {
+        sort(nums.begin(), nums.end());
+        const int mod = 1e9 + 7;
+        int n = nums.size();
+        int f[n + 1];
+        f[0] = 1;
+        for (int i = 1; i <= n; ++i) {
+            f[i] = (f[i - 1] * 2) % mod;
+        }
+        int ans = 0;
+        for (int i = 0; i < n && nums[i] * 2 <= target; ++i) {
+            int j = upper_bound(nums.begin() + i + 1, nums.end(), target - nums[i]) - nums.begin() - 1;
+            ans = (ans + f[j - i]) % mod;
+        }
+        return ans;
+    }
+};
+```
+
+#### Go
+
+```go
+func numSubseq(nums []int, target int) (ans int) {
+	sort.Ints(nums)
+	n := len(nums)
+	f := make([]int, n+1)
+	f[0] = 1
+	const mod int = 1e9 + 7
+	for i := 1; i <= n; i++ {
+		f[i] = f[i-1] * 2 % mod
+	}
+	for i, x := range nums {
+		if x*2 > target {
+			break
+		}
+		j := sort.SearchInts(nums[i+1:], target-x+1) + i
+		ans = (ans + f[j-i]) % mod
+	}
+	return
+}
+```
+
+#### TypeScript
+
+```ts
+function numSubseq(nums: number[], target: number): number {
+    nums.sort((a, b) => a - b);
+    const mod = 1e9 + 7;
+    const n = nums.length;
+    const f: number[] = Array(n + 1).fill(1);
+    for (let i = 1; i <= n; ++i) {
+        f[i] = (f[i - 1] * 2) % mod;
+    }
+
+    let ans = 0;
+    for (let i = 0; i < n && nums[i] * 2 <= target; ++i) {
+        const j = search(nums, target - nums[i], i + 1) - 1;
+        if (j >= i) {
+            ans = (ans + f[j - i]) % mod;
+        }
+    }
+    return ans;
+}
+
+function search(nums: number[], x: number, left: number): number {
+    let right = nums.length;
+    while (left < right) {
+        const mid = (left + right) >> 1;
+        if (nums[mid] > x) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return left;
+}
+```
+
+#### Rust
+
+```rust
+impl Solution {
+    pub fn num_subseq(mut nums: Vec<i32>, target: i32) -> i32 {
+        nums.sort();
+        const MOD: i32 = 1_000_000_007;
+        let n = nums.len();
+        let mut f = vec![1; n + 1];
+        for i in 1..=n {
+            f[i] = (f[i - 1] * 2) % MOD;
+        }
+        let mut ans = 0;
+        for i in 0..n {
+            if nums[i] * 2 > target {
+                break;
+            }
+            let mut l = i + 1;
+            let mut r = n;
+            while l < r {
+                let m = (l + r) / 2;
+                if nums[m] > target - nums[i] {
+                    r = m;
+                } else {
+                    l = m + 1;
+                }
+            }
+            let j = l - 1;
+            ans = (ans + f[j - i]) % MOD;
+        }
+        ans
+    }
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- problem:end -->
