@@ -1,0 +1,527 @@
+---
+comments: true
+difficulty: Medium
+tags:
+    - Tree
+    - Depth-First Search
+    - Tree DP
+---
+
+<!-- problem:start -->
+
+# [1522. Diameter of N-Ary Tree 🔒](https://leetcode.com/problems/diameter-of-n-ary-tree)
+
+[中文文档](/solution/1500-1599/1522.Diameter%20of%20N-Ary%20Tree/README.md)
+
+## Mô tả
+
+<!-- description:start -->
+
+<p>Cho <code>root</code> của một <code>N-ary tree</code>, hãy tính độ dài đường kính của cây.</p>
+
+<p>Đường kính của cây N-ary là độ dài đường đi <strong>dài nhất</strong> giữa hai node bất kỳ trong cây. Đường đi này có thể đi qua root hoặc không.</p>
+
+<p>(<em>Nary-Tree input serialization is represented in their level order traversal, each group of children is separated by the null value.)</em></p>
+
+<p>&nbsp;</p>
+<p><strong class="example">Ví dụ 1:</strong></p>
+
+<p><img alt="" src="https://fastly.jsdelivr.net/gh/doocs/leetcode@main/solution/1500-1599/1522.Diameter%20of%20N-Ary%20Tree/images/sample_2_1897.png" style="width: 324px; height: 173px;" /></p>
+
+<pre>
+<strong>Input:</strong> root = [1,null,3,2,4,null,5,6]
+<strong>Output:</strong> 3
+<strong>Giải thích: </strong>Đường kính được hiển thị bằng màu đỏ.</pre>
+
+<p><strong class="example">Ví dụ 2:</strong></p>
+
+<p><strong><img alt="" src="https://fastly.jsdelivr.net/gh/doocs/leetcode@main/solution/1500-1599/1522.Diameter%20of%20N-Ary%20Tree/images/sample_1_1897.png" style="width: 253px; height: 246px;" /></strong></p>
+
+<pre>
+<strong>Input:</strong> root = [1,null,2,null,3,4,null,5,null,6]
+<strong>Output:</strong> 4
+</pre>
+
+<p><strong class="example">Ví dụ 3:</strong></p>
+
+<p><img alt="" src="https://fastly.jsdelivr.net/gh/doocs/leetcode@main/solution/1500-1599/1522.Diameter%20of%20N-Ary%20Tree/images/sample_3_1897.png" style="width: 369px; height: 326px;" /></p>
+
+<pre>
+<strong>Input:</strong> root = [1,null,2,3,4,5,null,null,6,7,null,8,null,9,10,null,null,11,null,12,null,13,null,null,14]
+<strong>Output:</strong> 7
+</pre>
+
+<p>&nbsp;</p>
+<p><strong>Ràng buộc:</strong></p>
+
+<ul>
+	<li>Độ sâu của cây n-ary không vượt quá <code>1000</code>.</li>
+	<li>Tổng số node nằm trong khoảng <code>[1, 10<sup>4</sup>]</code>.</li>
+</ul>
+
+<!-- description:end -->
+
+## Lời giải
+
+<!-- solution:start -->
+
+### Lời giải 1: DFS (đường kính hậu tự)
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Đường kính của cây $N$-ary là khoảng cách dài nhất giữa hai node. Cây có thể chứa hàng nghìn node, nên việc duyệt lặp thiếu thận trọng sẽ lãng phí. Đường kính đi qua một node bằng tổng độ cao của hai cây con sâu nhất.
+>
+> DFS hậu tự thu thập độ cao các cây con, cập nhật đáp án toàn cục bằng tổng hai giá trị lớn nhất, rồi trả về độ cao của node. Một lần duyệt là đủ để xét mọi ứng viên mà không cần dựng graph khác.
+
+<!-- thinking:end -->
+
+Duyệt mỗi node theo thứ tự hậu tự, ghi lại hai độ cao cây con lớn nhất $m_1$ và $m_2$, rồi cập nhật đường kính bằng $m_1+m_2$. Độ cao của một cây con bằng 1 cộng với độ cao cây con sâu nhất.
+
+Độ phức tạp thời gian là $O(n)$ và độ phức tạp không gian là $O(n)$, với $n$ là số node.
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val=None, children=None):
+        self.val = val
+        self.children = children if children is not None else []
+"""
+
+
+class Solution:
+    def diameter(self, root: 'Node') -> int:
+        """
+        :type root: 'Node'
+        :rtype: int
+        """
+
+        def dfs(root):
+            if root is None:
+                return 0
+            nonlocal ans
+            m1 = m2 = 0
+            for child in root.children:
+                t = dfs(child)
+                if t > m1:
+                    m2, m1 = m1, t
+                elif t > m2:
+                    m2 = t
+            ans = max(ans, m1 + m2)
+            return 1 + m1
+
+        ans = 0
+        dfs(root)
+        return ans
+```
+
+#### Java
+
+```java
+/*
+// Definition for a Node.
+class Node {
+    public int val;
+    public List<Node> children;
+
+
+    public Node() {
+        children = new ArrayList<Node>();
+    }
+
+    public Node(int _val) {
+        val = _val;
+        children = new ArrayList<Node>();
+    }
+
+    public Node(int _val,ArrayList<Node> _children) {
+        val = _val;
+        children = _children;
+    }
+};
+*/
+
+class Solution {
+    private int ans;
+
+    public int diameter(Node root) {
+        ans = 0;
+        dfs(root);
+        return ans;
+    }
+
+    private int dfs(Node root) {
+        if (root == null) {
+            return 0;
+        }
+        int m1 = 0, m2 = 0;
+        for (Node child : root.children) {
+            int t = dfs(child);
+            if (t > m1) {
+                m2 = m1;
+                m1 = t;
+            } else if (t > m2) {
+                m2 = t;
+            }
+        }
+        ans = Math.max(ans, m1 + m2);
+        return 1 + m1;
+    }
+}
+```
+
+#### C++
+
+```cpp
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> children;
+
+    Node() {}
+
+    Node(int _val) {
+        val = _val;
+    }
+
+    Node(int _val, vector<Node*> _children) {
+        val = _val;
+        children = _children;
+    }
+};
+*/
+
+class Solution {
+public:
+    int ans;
+
+    int diameter(Node* root) {
+        ans = 0;
+        dfs(root);
+        return ans;
+    }
+
+    int dfs(Node* root) {
+        if (!root) return 0;
+        int m1 = 0, m2 = 0;
+        for (Node* child : root->children) {
+            int t = dfs(child);
+            if (t > m1) {
+                m2 = m1;
+                m1 = t;
+            } else if (t > m2)
+                m2 = t;
+        }
+        ans = max(ans, m1 + m2);
+        return 1 + m1;
+    }
+};
+```
+
+#### Go
+
+```go
+/**
+ * Definition for a Node.
+ * type Node struct {
+ *     Val int
+ *     Children []*Node
+ * }
+ */
+
+func diameter(root *Node) int {
+	ans := 0
+	var dfs func(root *Node) int
+	dfs = func(root *Node) int {
+		if root == nil {
+			return 0
+		}
+		m1, m2 := 0, 0
+		for _, child := range root.Children {
+			t := dfs(child)
+			if t > m1 {
+				m2, m1 = m1, t
+			} else if t > m2 {
+				m2 = t
+			}
+		}
+		ans = max(ans, m1+m2)
+		return 1 + m1
+	}
+	dfs(root)
+	return ans
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- solution:start -->
+
+### Lời giải 2: Dựng graph + hai DFS
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Lời giải 1 gộp đường kính vào tree DP. Nếu chỉ có danh sách kề hoặc muốn dùng thuật toán graph kinh điển, cách gắn kết đó không thuận tiện. Hãy dựng graph vô hướng, đi từ một node bất kỳ đến node xa nhất, rồi đi lần nữa từ node đó; khoảng cách thứ hai chính là đường kính. Hai lượt DFS có cùng độ phức tạp tiệm cận với tree DP và chỉ khác ở cách cài đặt.
+
+<!-- thinking:end -->
+
+Chuyển cây $N$-ary thành graph vô hướng. DFS từ một node bất kỳ để tìm node xa nhất, rồi DFS lần nữa từ node đó. Khoảng cách xa nhất trong lần tìm thứ hai là đường kính của cây.
+
+Độ phức tạp thời gian là $O(n)$ và độ phức tạp không gian là $O(n)$, với $n$ là số node.
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val=None, children=None):
+        self.val = val
+        self.children = children if children is not None else []
+"""
+
+
+class Solution:
+    def diameter(self, root: 'Node') -> int:
+        """
+        :type root: 'Node'
+        :rtype: int
+        """
+
+        def build(root):
+            nonlocal d
+            if root is None:
+                return
+            for child in root.children:
+                d[root].add(child)
+                d[child].add(root)
+                build(child)
+
+        def dfs(u, t):
+            nonlocal ans, vis, d, next
+            if u in vis:
+                return
+            vis.add(u)
+            for v in d[u]:
+                dfs(v, t + 1)
+            if ans < t:
+                ans = t
+                next = u
+
+        d = defaultdict(set)
+        vis = set()
+        build(root)
+        ans = 0
+        next = None
+        dfs(root, 0)
+        vis.clear()
+        dfs(next, 0)
+        return ans
+```
+
+#### Java
+
+```java
+/*
+// Definition for a Node.
+class Node {
+    public int val;
+    public List<Node> children;
+
+
+    public Node() {
+        children = new ArrayList<Node>();
+    }
+
+    public Node(int _val) {
+        val = _val;
+        children = new ArrayList<Node>();
+    }
+
+    public Node(int _val,ArrayList<Node> _children) {
+        val = _val;
+        children = _children;
+    }
+};
+*/
+
+class Solution {
+    private Map<Node, Set<Node>> g;
+    private Set<Node> vis;
+    private Node next;
+    private int ans;
+
+    public int diameter(Node root) {
+        g = new HashMap<>();
+        build(root);
+        vis = new HashSet<>();
+        next = root;
+        ans = 0;
+        dfs(next, 0);
+        vis.clear();
+        dfs(next, 0);
+        return ans;
+    }
+
+    private void dfs(Node u, int t) {
+        if (vis.contains(u)) {
+            return;
+        }
+        vis.add(u);
+        if (t > ans) {
+            ans = t;
+            next = u;
+        }
+        if (g.containsKey(u)) {
+            for (Node v : g.get(u)) {
+                dfs(v, t + 1);
+            }
+        }
+    }
+
+    private void build(Node root) {
+        if (root == null) {
+            return;
+        }
+        for (Node child : root.children) {
+            g.computeIfAbsent(root, k -> new HashSet<>()).add(child);
+            g.computeIfAbsent(child, k -> new HashSet<>()).add(root);
+            build(child);
+        }
+    }
+}
+```
+
+#### C++
+
+```cpp
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> children;
+
+    Node() {}
+
+    Node(int _val) {
+        val = _val;
+    }
+
+    Node(int _val, vector<Node*> _children) {
+        val = _val;
+        children = _children;
+    }
+};
+*/
+
+class Solution {
+public:
+    unordered_map<Node*, unordered_set<Node*>> g;
+    unordered_set<Node*> vis;
+    Node* next;
+    int ans;
+
+    int diameter(Node* root) {
+        build(root);
+        next = root;
+        ans = 0;
+        dfs(next, 0);
+        vis.clear();
+        dfs(next, 0);
+        return ans;
+    }
+
+    void dfs(Node* u, int t) {
+        if (vis.count(u)) return;
+        vis.insert(u);
+        if (ans < t) {
+            ans = t;
+            next = u;
+        }
+        if (g.count(u))
+            for (Node* v : g[u])
+                dfs(v, t + 1);
+    }
+
+    void build(Node* root) {
+        if (!root) return;
+        for (Node* child : root->children) {
+            g[root].insert(child);
+            g[child].insert(root);
+            build(child);
+        }
+    }
+};
+```
+
+#### Go
+
+```go
+/**
+ * Definition for a Node.
+ * type Node struct {
+ *     Val int
+ *     Children []*Node
+ * }
+ */
+
+func diameter(root *Node) int {
+	g := make(map[*Node][]*Node)
+	vis := make(map[*Node]bool)
+	next := root
+	ans := 0
+	var build func(root *Node)
+	build = func(root *Node) {
+		if root == nil {
+			return
+		}
+		for _, child := range root.Children {
+			g[root] = append(g[root], child)
+			g[child] = append(g[child], root)
+			build(child)
+		}
+	}
+	build(root)
+	var dfs func(u *Node, t int)
+	dfs = func(u *Node, t int) {
+		if vis[u] {
+			return
+		}
+		vis[u] = true
+		if t > ans {
+			ans = t
+			next = u
+		}
+		if vs, ok := g[u]; ok {
+			for _, v := range vs {
+				dfs(v, t+1)
+			}
+		}
+	}
+	dfs(next, 0)
+	vis = make(map[*Node]bool)
+	dfs(next, 0)
+	return ans
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- problem:end -->
