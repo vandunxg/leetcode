@@ -16,81 +16,81 @@ tags:
 
 [中文文档](/solution/1200-1299/1208.Get%20Equal%20Substrings%20Within%20Budget/README.md)
 
-## Description
+## Mô tả
 
 <!-- description:start -->
 
-<p>You are given two strings <code>s</code> and <code>t</code> of the same length and an integer <code>maxCost</code>.</p>
+<p>Cho hai chuỗi <code>s</code> và <code>t</code> có cùng độ dài và số nguyên <code>maxCost</code>.</p>
 
-<p>You want to change <code>s</code> to <code>t</code>. Changing the <code>i<sup>th</sup></code> character of <code>s</code> to <code>i<sup>th</sup></code> character of <code>t</code> costs <code>|s[i] - t[i]|</code> (i.e., the absolute difference between the ASCII values of the characters).</p>
+<p>Bạn muốn biến đổi <code>s</code> thành <code>t</code>. Đổi ký tự thứ <code>i<sup>th</sup></code> của <code>s</code> thành ký tự thứ <code>i<sup>th</sup></code> của <code>t</code> tốn <code>|s[i] - t[i]|</code> (tức trị tuyệt đối của hiệu giữa mã ASCII của hai ký tự).</p>
 
-<p>Return <em>the maximum length of a substring of </em><code>s</code><em> that can be changed to be the same as the corresponding substring of </em><code>t</code><em> with a cost less than or equal to </em><code>maxCost</code>. If there is no substring from <code>s</code> that can be changed to its corresponding substring from <code>t</code>, return <code>0</code>.</p>
-
-<p>&nbsp;</p>
-<p><strong class="example">Example 1:</strong></p>
-
-<pre>
-<strong>Input:</strong> s = &quot;abcd&quot;, t = &quot;bcdf&quot;, maxCost = 3
-<strong>Output:</strong> 3
-<strong>Explanation:</strong> &quot;abc&quot; of s can change to &quot;bcd&quot;.
-That costs 3, so the maximum length is 3.
-</pre>
-
-<p><strong class="example">Example 2:</strong></p>
-
-<pre>
-<strong>Input:</strong> s = &quot;abcd&quot;, t = &quot;cdef&quot;, maxCost = 3
-<strong>Output:</strong> 1
-<strong>Explanation:</strong> Each character in s costs 2 to change to character in t,  so the maximum length is 1.
-</pre>
-
-<p><strong class="example">Example 3:</strong></p>
-
-<pre>
-<strong>Input:</strong> s = &quot;abcd&quot;, t = &quot;acde&quot;, maxCost = 0
-<strong>Output:</strong> 1
-<strong>Explanation:</strong> You cannot make any change, so the maximum length is 1.
-</pre>
+<p>Trả về <em>độ dài lớn nhất của chuỗi con trong </em><code>s</code><em> có thể được biến đổi thành chuỗi con tương ứng trong </em><code>t</code><em> với chi phí không vượt quá </em><code>maxCost</code>. Nếu không có chuỗi con nào trong <code>s</code> có thể biến đổi thành chuỗi con tương ứng trong <code>t</code>, trả về <code>0</code>.</p>
 
 <p>&nbsp;</p>
-<p><strong>Constraints:</strong></p>
+<p><strong class="example">Ví dụ 1:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> s = &quot;abcd&quot;, t = &quot;bcdf&quot;, maxCost = 3
+<strong>Đầu ra:</strong> 3
+<strong>Giải thích:</strong> &quot;abc&quot; trong s có thể được biến đổi thành &quot;bcd&quot;.
+Chi phí là 3, nên độ dài lớn nhất là 3.
+</pre>
+
+<p><strong class="example">Ví dụ 2:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> s = &quot;abcd&quot;, t = &quot;cdef&quot;, maxCost = 3
+<strong>Đầu ra:</strong> 1
+<strong>Giải thích:</strong> Mỗi ký tự trong s cần chi phí 2 để đổi thành ký tự tương ứng trong t, nên độ dài lớn nhất là 1.
+</pre>
+
+<p><strong class="example">Ví dụ 3:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> s = &quot;abcd&quot;, t = &quot;acde&quot;, maxCost = 0
+<strong>Đầu ra:</strong> 1
+<strong>Giải thích:</strong> Bạn không thể thực hiện phép đổi nào, nên độ dài lớn nhất là 1.
+</pre>
+
+<p>&nbsp;</p>
+<p><strong>Ràng buộc:</strong></p>
 
 <ul>
 	<li><code>1 &lt;= s.length &lt;= 10<sup>5</sup></code></li>
 	<li><code>t.length == s.length</code></li>
 	<li><code>0 &lt;= maxCost &lt;= 10<sup>6</sup></code></li>
-	<li><code>s</code> and <code>t</code> consist of only lowercase English letters.</li>
+	<li><code>s</code> và <code>t</code> chỉ gồm các chữ cái tiếng Anh viết thường.</li>
 </ul>
 
 <!-- description:end -->
 
-## Solutions
+## Lời giải
 
 <!-- solution:start -->
 
-### Solution 1: Prefix Sum + Binary Search
+### Lời giải 1: Tổng tiền tố + Tìm kiếm nhị phân
 
 <!-- thinking:start -->
 
-> **Thinking**
+> **Tư duy**
 >
-> A substring's cost is the sum of absolute ASCII differences. $n \le 10^5$ rules out enumerating all $O(n^2)$ substrings.
+> Chi phí của một chuỗi con là tổng trị tuyệt đối của các hiệu mã ASCII. Vì $n \le 10^5$, không thể duyệt hết $O(n^2)$ chuỗi con.
 >
-> Feasibility is monotone in length: if some string of length $x$ fits the budget, so does length $x-1$. Any interval cost is $O(1)$ from a prefix sum.
+> Tính khả thi đơn điệu theo độ dài: nếu có chuỗi dài $x$ vừa ngân sách thì cũng có chuỗi dài $x-1$ vừa ngân sách. Có thể tính chi phí của một đoạn bất kỳ trong $O(1)$ bằng tổng tiền tố.
 >
-> We build the prefix of pairwise costs, binary-search the length, and scan windows of that length to verify. Monotonicity justifies the search; the prefix sum removes the inner summation.
+> Ta lập mảng tổng tiền tố của chi phí từng cặp ký tự, tìm kiếm nhị phân theo độ dài rồi duyệt các cửa sổ có độ dài đó để kiểm tra. Tính đơn điệu cho phép tìm kiếm nhị phân; tổng tiền tố loại bỏ vòng lặp tính tổng bên trong.
 
 <!-- thinking:end -->
 
-We can create an array $f$ of length $n + 1$, where $f[i]$ represents the sum of the absolute differences of ASCII values between the first $i$ characters of string $s$ and the first $i$ characters of string $t$. Thus, we can calculate the sum of the absolute differences of ASCII values from the $i$-th character to the $j$-th character of string $s$ by $f[j + 1] - f[i]$, where $0 \leq i \leq j < n$.
+Ta tạo mảng $f$ có độ dài $n + 1$, trong đó $f[i]$ là tổng trị tuyệt đối của hiệu mã ASCII giữa $i$ ký tự đầu của chuỗi $s$ và $i$ ký tự đầu của chuỗi $t$. Vì vậy, tổng trị tuyệt đối của hiệu mã ASCII từ ký tự thứ $i$ đến ký tự thứ $j$ trong $s$ được tính bằng $f[j + 1] - f[i]$, với $0 \leq i \leq j < n$.
 
-Note that the length has monotonicity, i.e., if there exists a substring of length $x$ that satisfies the condition, then a substring of length $x - 1$ must also satisfy the condition. Therefore, we can use binary search to find the maximum length.
+Tính khả thi đơn điệu theo độ dài: nếu tồn tại chuỗi con độ dài $x$ thỏa điều kiện, thì cũng tồn tại chuỗi con độ dài $x - 1$ thỏa điều kiện. Do đó, ta có thể dùng tìm kiếm nhị phân để tìm độ dài lớn nhất.
 
-We define a function $check(x)$, which indicates whether there exists a substring of length $x$ that satisfies the condition. In this function, we only need to enumerate all substrings of length $x$ and check whether they satisfy the condition. If there exists a substring that satisfies the condition, the function returns `true`, otherwise it returns `false`.
+Ta định nghĩa hàm $check(x)$ để kiểm tra xem có chuỗi con độ dài $x$ thỏa điều kiện hay không. Chỉ cần duyệt tất cả chuỗi con độ dài $x$ và kiểm tra điều kiện. Nếu có chuỗi con phù hợp, hàm trả về `true`; nếu không, trả về `false`.
 
-Next, we define the left boundary $l$ of binary search as $0$ and the right boundary $r$ as $n$. In each step, we let $mid = \lfloor \frac{l + r + 1}{2} \rfloor$. If the return value of $check(mid)$ is `true`, we update the left boundary to $mid$, otherwise we update the right boundary to $mid - 1$. After the binary search, the left boundary we get is the answer.
+Đặt biên trái $l = 0$ và biên phải $r = n$. Mỗi bước, tính $mid = \lfloor \frac{l + r + 1}{2} \rfloor$. Nếu $check(mid)$ trả về `true`, cập nhật biên trái thành $mid$; nếu không, cập nhật biên phải thành $mid - 1$. Khi tìm kiếm nhị phân kết thúc, biên trái là đáp án.
 
-The time complexity is $O(n \times \log n)$, and the space complexity is $O(n)$. Here, $n$ is the length of string $s$.
+Độ phức tạp thời gian là $O(n \times \log n)$ và độ phức tạp không gian là $O(n)$, trong đó $n$ là độ dài chuỗi $s$.
 
 <!-- tabs:start -->
 
@@ -271,21 +271,21 @@ function equalSubstring(s: string, t: string, maxCost: number): number {
 
 <!-- solution:start -->
 
-### Solution 2: Two Pointers
+### Lời giải 2: Hai con trỏ
 
 <!-- thinking:start -->
 
-> **Thinking**
+> **Tư duy**
 >
-> Solution 1 uses an $O(n)$ prefix array and $O(n\log n)$ time. Costs are non-negative, so extending the right end only increases the cost and advancing the left end only decreases it. Two pointers maintain the longest feasible window in one pass, in linear time and constant extra space.
+> Lời giải 1 dùng mảng tổng tiền tố tốn $O(n)$ bộ nhớ và thời gian $O(n\log n)$. Chi phí không âm, nên mở rộng đầu phải chỉ làm tăng chi phí còn dịch đầu trái chỉ làm giảm chi phí. Hai con trỏ duy trì cửa sổ dài nhất thỏa điều kiện trong một lượt duyệt, với thời gian tuyến tính và bộ nhớ phụ hằng số.
 
 <!-- thinking:end -->
 
-We can maintain two pointers $l$ and $r$, initially $l = r = 0$; maintain a variable $\textit{cost}$, which represents the sum of the absolute values of the ASCII code differences in the index interval $[l,..r]$. In each step, we move $r$ to the right by one position, then update $\textit{cost} = \textit{cost} + |s[r] - t[r]|$. If $\textit{cost} \gt \textit{maxCost}$, then we loop to move $l$ to the right by one position, and decrease the value of $\textit{cost}$, until $\textit{cost} \leq \textit{maxCost}$. Then we update the answer, that is, $\textit{ans} = \max(\textit{ans}, r - l + 1)$.
+Duy trì hai con trỏ $l$ và $r$, ban đầu $l = r = 0$, cùng biến $\textit{cost}$ biểu thị tổng trị tuyệt đối của hiệu mã ASCII trong đoạn chỉ số $[l,..r]$. Mỗi bước, dịch $r$ sang phải một vị trí rồi cập nhật $\textit{cost} = \textit{cost} + |s[r] - t[r]|$. Nếu $\textit{cost} \gt \textit{maxCost}$, tiếp tục dịch $l$ sang phải và giảm $\textit{cost}$ cho đến khi $\textit{cost} \leq \textit{maxCost}$. Sau đó cập nhật đáp án bằng $\textit{ans} = \max(\textit{ans}, r - l + 1)$.
 
-Finally, return the answer.
+Cuối cùng, trả về đáp án.
 
-The time complexity is $O(n)$, where $n$ is the length of the string $s$. The space complexity is $O(1)$.
+Độ phức tạp thời gian là $O(n)$, trong đó $n$ là độ dài chuỗi $s$. Độ phức tạp không gian là $O(1)$.
 
 <!-- tabs:start -->
 
@@ -394,23 +394,23 @@ function equalSubstring(s: string, t: string, maxCost: number): number {
 
 <!-- solution:start -->
 
-### Solution 3: Another Way of Using Two Pointers
+### Lời giải 3: Một cách dùng hai con trỏ khác
 
 <!-- thinking:start -->
 
-> **Thinking**
+> **Tư duy**
 >
-> Solution 2 may shrink and then grow the window, and it stores the answer explicitly. Only the maximum length is required, so we can let the left pointer move only forward and keep the window monotone. The final $n-l$ is that maximum, without a separate $ans$ variable.
+> Lời giải 2 có thể thu nhỏ rồi lại mở rộng cửa sổ, đồng thời lưu đáp án riêng. Vì chỉ cần độ dài lớn nhất, ta có thể chỉ dịch con trỏ trái về phía trước để duy trì cửa sổ đơn điệu. Cuối cùng, $n-l$ chính là độ dài lớn nhất, không cần biến $ans$ riêng.
 
 <!-- thinking:end -->
 
-In Solution 2, the interval maintained by the two pointers may become shorter or longer. Since the problem only requires the maximum length, we can maintain a monotonically increasing interval.
+Trong Lời giải 2, đoạn được duy trì bởi hai con trỏ có thể ngắn lại hoặc dài ra. Vì bài toán chỉ yêu cầu độ dài lớn nhất, ta có thể duy trì một đoạn có độ dài không giảm.
 
-Specifically, we use two pointers $l$ and $r$ to point to the left and right endpoints of the interval, initially $l = r = 0$. In each step, we move $r$ to the right by one position, then update $\textit{cost} = \textit{cost} + |s[r] - t[r]|$. If $\textit{cost} \gt \textit{maxCost}$, then we move $l$ to the right by one position, and decrease the value of $\textit{cost}$.
+Cụ thể, dùng hai con trỏ $l$ và $r$ làm hai đầu đoạn, ban đầu $l = r = 0$. Mỗi bước, dịch $r$ sang phải một vị trí rồi cập nhật $\textit{cost} = \textit{cost} + |s[r] - t[r]|$. Nếu $\textit{cost} \gt \textit{maxCost}$, dịch $l$ sang phải một vị trí và giảm $\textit{cost}$.
 
-Finally, return $n - l$.
+Cuối cùng, trả về $n - l$.
 
-The time complexity is $O(n)$, and the space complexity is $O(1)$. Where $n$ is the length of the string $s$.
+Độ phức tạp thời gian là $O(n)$ và độ phức tạp không gian là $O(1)$, trong đó $n$ là độ dài chuỗi $s$.
 
 <!-- tabs:start -->
 

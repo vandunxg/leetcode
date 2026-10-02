@@ -15,72 +15,72 @@ tags:
 
 [中文文档](/solution/1100-1199/1189.Maximum%20Number%20of%20Balloons/README.md)
 
-## Description
+## Mô tả
 
 <!-- description:start -->
 
-<p>Given a string <code>text</code>, you want to use the characters of <code>text</code> to form as many instances of the word <strong>&quot;balloon&quot;</strong> as possible.</p>
+<p>Cho chuỗi <code>text</code>, hãy dùng các ký tự trong <code>text</code> để tạo được nhiều lần xuất hiện của từ <strong>&quot;balloon&quot;</strong> nhất có thể.</p>
 
-<p>You can use each character in <code>text</code> <strong>at most once</strong>. Return the maximum number of instances that can be formed.</p>
+<p>Mỗi ký tự trong <code>text</code> chỉ được dùng <strong>tối đa một lần</strong>. Hãy trả về số lần xuất hiện tối đa có thể tạo được.</p>
 
 <p>&nbsp;</p>
-<p><strong class="example">Example 1:</strong></p>
+<p><strong class="example">Ví dụ 1:</strong></p>
 
 <p><strong><img alt="" src="https://fastly.jsdelivr.net/gh/doocs/leetcode@main/solution/1100-1199/1189.Maximum%20Number%20of%20Balloons/images/1536_ex1_upd.jpg" style="width: 132px; height: 35px;" /></strong></p>
 
 <pre>
-<strong>Input:</strong> text = &quot;nlaebolko&quot;
-<strong>Output:</strong> 1
+<strong>Đầu vào:</strong> text = &quot;nlaebolko&quot;
+<strong>Đầu ra:</strong> 1
 </pre>
 
-<p><strong class="example">Example 2:</strong></p>
+<p><strong class="example">Ví dụ 2:</strong></p>
 
 <p><strong><img alt="" src="https://fastly.jsdelivr.net/gh/doocs/leetcode@main/solution/1100-1199/1189.Maximum%20Number%20of%20Balloons/images/1536_ex2_upd.jpg" style="width: 267px; height: 35px;" /></strong></p>
 
 <pre>
-<strong>Input:</strong> text = &quot;loonbalxballpoon&quot;
-<strong>Output:</strong> 2
+<strong>Đầu vào:</strong> text = &quot;loonbalxballpoon&quot;
+<strong>Đầu ra:</strong> 2
 </pre>
 
-<p><strong class="example">Example 3:</strong></p>
+<p><strong class="example">Ví dụ 3:</strong></p>
 
 <pre>
-<strong>Input:</strong> text = &quot;leetcode&quot;
-<strong>Output:</strong> 0
+<strong>Đầu vào:</strong> text = &quot;leetcode&quot;
+<strong>Đầu ra:</strong> 0
 </pre>
 
 <p>&nbsp;</p>
-<p><strong>Constraints:</strong></p>
+<p><strong>Ràng buộc:</strong></p>
 
 <ul>
 	<li><code>1 &lt;= text.length &lt;= 10<sup>4</sup></code></li>
-	<li><code>text</code> consists of lower case English letters only.</li>
+	<li><code>text</code> chỉ gồm các chữ cái tiếng Anh viết thường.</li>
 </ul>
 
 <p>&nbsp;</p>
-<p><strong>Note:</strong> This question is the same as <a href="https://leetcode.com/problems/rearrange-characters-to-make-target-string/description/" target="_blank"> 2287: Rearrange Characters to Make Target String.</a></p>
+<p><strong>Lưu ý:</strong> Bài này giống với <a href="https://leetcode.com/problems/rearrange-characters-to-make-target-string/description/" target="_blank"> 2287: Rearrange Characters to Make Target String.</a></p>
 
 <!-- description:end -->
 
-## Solutions
+## Lời giải
 
 <!-- solution:start -->
 
-### Solution 1: Counting
+### Lời giải 1: Đếm tần suất
 
 <!-- thinking:start -->
 
-> **Thinking**
+> **Tư duy**
 >
-> `balloon` needs $b,a$, two $l$, two $o$, and $n$. After counting `text`, halve $l$ and $o$ and take the min over $b,a,l,o,n$. There is no need to delete letters from the string repeatedly.
+> Từ `balloon` cần các ký tự $b,a,n$ mỗi ký tự một lần, và $l,o$ mỗi ký tự hai lần. Sau khi đếm ký tự trong `text`, chia đôi số lượng $l$ và $o$, rồi lấy giá trị nhỏ nhất trong số lượng $b,a,l,o,n$. Không cần xóa ký tự khỏi chuỗi nhiều lần.
 
 <!-- thinking:end -->
 
-We count the frequency of each letter in the string `text`, and then divide the frequency of the letters 'o' and 'l' by 2, because the word `balloon` contains the letters 'o' and 'l' twice.
+Ta đếm tần suất của từng chữ cái trong chuỗi `text`, sau đó chia đôi tần suất của 'o' và 'l' vì từ `balloon` có hai chữ cái 'o' và hai chữ cái 'l'.
 
-Next, we traverse each letter in the word `balon`, and find the minimum frequency of each letter in the string `text`. This minimum frequency is the maximum number of times the word `balloon` can appear in the string `text`.
+Tiếp theo, ta xét từng chữ cái trong từ `balon` và tìm tần suất nhỏ nhất của chúng trong chuỗi `text`. Tần suất nhỏ nhất này chính là số lần tối đa từ `balloon` có thể xuất hiện trong `text`.
 
-The time complexity is $O(n)$, and the space complexity is $O(C)$. Here, $n$ is the length of the string `text`, and $C$ is the size of the character set. In this problem, $C = 26$.
+Độ phức tạp thời gian là $O(n)$, độ phức tạp không gian là $O(C)$. Trong đó, $n$ là độ dài chuỗi `text`, còn $C$ là kích thước của tập ký tự. Ở bài này, $C = 26$.
 
 <!-- tabs:start -->
 
