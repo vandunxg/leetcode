@@ -1,0 +1,274 @@
+---
+comments: true
+difficulty: Hard
+tags:
+    - Trie
+    - Array
+    - String
+    - Backtracking
+---
+
+<!-- problem:start -->
+
+# [425. Word Squares 🔒](https://leetcode.com/problems/word-squares)
+
+[中文文档](/solution/0400-0499/0425.Word%20Squares/README.md)
+
+## Mô tả
+
+<!-- description:start -->
+
+<p>Cho mảng <code>words</code> gồm các chuỗi <strong>khác nhau</strong>, hãy trả về <em>tất cả </em><strong><a href="https://en.wikipedia.org/wiki/Word_square" target="_blank">word square</a></strong><em> có thể tạo từ </em><code>words</code>. Có thể dùng cùng một từ trong <code>words</code> <strong>nhiều lần</strong>. Có thể trả lời theo <strong>bất kỳ thứ tự nào</strong>.</p>
+
+<p>Một dãy chuỗi tạo thành <strong>word square</strong> hợp lệ nếu hàng thứ <code>k<sup>th</sup></code> và cột thứ <code>k<sup>th</sup></code> cho ra cùng một chuỗi, với <code>0 &lt;= k &lt; max(numRows, numColumns)</code>.</p>
+
+<ul>
+	<li>Ví dụ, dãy từ <code>[&quot;ball&quot;,&quot;area&quot;,&quot;lead&quot;,&quot;lady&quot;]</code> tạo thành word square vì khi đọc ngang hay đọc dọc đều cho ra cùng một từ.</li>
+</ul>
+
+<p>&nbsp;</p>
+<p><strong class="example">Ví dụ 1:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> words = [&quot;area&quot;,&quot;lead&quot;,&quot;wall&quot;,&quot;lady&quot;,&quot;ball&quot;]
+<strong>Đầu ra:</strong> [[&quot;ball&quot;,&quot;area&quot;,&quot;lead&quot;,&quot;lady&quot;],[&quot;wall&quot;,&quot;area&quot;,&quot;lead&quot;,&quot;lady&quot;]]
+<strong>Giải thích:</strong>
+Kết quả gồm hai word square. Thứ tự của các word square không quan trọng, nhưng thứ tự các từ bên trong mỗi word square thì có.
+</pre>
+
+<p><strong class="example">Ví dụ 2:</strong></p>
+
+<pre>
+<strong>Đầu vào:</strong> words = [&quot;abat&quot;,&quot;baba&quot;,&quot;atan&quot;,&quot;atal&quot;]
+<strong>Đầu ra:</strong> [[&quot;baba&quot;,&quot;abat&quot;,&quot;baba&quot;,&quot;atal&quot;],[&quot;baba&quot;,&quot;abat&quot;,&quot;baba&quot;,&quot;atan&quot;]]
+<strong>Giải thích:</strong>
+Kết quả gồm hai word square. Thứ tự của các word square không quan trọng, nhưng thứ tự các từ bên trong mỗi word square thì có.
+</pre>
+
+<p>&nbsp;</p>
+<p><strong>Ràng buộc:</strong></p>
+
+<ul>
+	<li><code>1 &lt;= words.length &lt;= 1000</code></li>
+	<li><code>1 &lt;= words[i].length &lt;= 4</code></li>
+	<li>Tất cả <code>words[i]</code> có cùng độ dài.</li>
+	<li><code>words[i]</code> chỉ gồm các chữ cái tiếng Anh viết thường.</li>
+	<li>Tất cả <code>words[i]</code> đều <strong>khác nhau</strong>.</li>
+</ul>
+
+<!-- description:end -->
+
+## Lời giải
+
+<!-- solution:start -->
+
+### Lời giải 1
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Ký tự đầu tiên của hàng $k$ trong word square được quyết định bởi các ký tự thứ $k$ của những hàng đã chọn. Quét toàn bộ danh sách để tìm prefix đó sẽ lặp lại các phép so sánh.
+>
+> Chèn mọi từ vào trie và lưu index của từ dọc theo các nhánh. DFS lần lượt điền các hàng: prefix được tạo từ những ký tự thứ $k$ này, rồi duyệt trie để lấy ngay tất cả từ có thể chọn.
+>
+> Word square hoàn chỉnh khi số hàng bằng độ dài của từ. Tạo trie trước giúp việc tìm prefix chỉ còn là duyệt xuống các nhánh.
+
+<!-- thinking:end -->
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+class Trie:
+    def __init__(self):
+        self.children = [None] * 26
+        self.v = []
+
+    def insert(self, w, i):
+        node = self
+        for c in w:
+            idx = ord(c) - ord('a')
+            if node.children[idx] is None:
+                node.children[idx] = Trie()
+            node = node.children[idx]
+            node.v.append(i)
+
+    def search(self, w):
+        node = self
+        for c in w:
+            idx = ord(c) - ord('a')
+            if node.children[idx] is None:
+                return []
+            node = node.children[idx]
+        return node.v
+
+
+class Solution:
+    def wordSquares(self, words: List[str]) -> List[List[str]]:
+        def dfs(t):
+            if len(t) == len(words[0]):
+                ans.append(t[:])
+                return
+            idx = len(t)
+            pref = [v[idx] for v in t]
+            indexes = trie.search(''.join(pref))
+            for i in indexes:
+                t.append(words[i])
+                dfs(t)
+                t.pop()
+
+        trie = Trie()
+        ans = []
+        for i, w in enumerate(words):
+            trie.insert(w, i)
+        for w in words:
+            dfs([w])
+        return ans
+```
+
+#### Java
+
+```java
+class Trie {
+    Trie[] children = new Trie[26];
+    List<Integer> v = new ArrayList<>();
+
+    void insert(String word, int i) {
+        Trie node = this;
+        for (char c : word.toCharArray()) {
+            c -= 'a';
+            if (node.children[c] == null) {
+                node.children[c] = new Trie();
+            }
+            node = node.children[c];
+            node.v.add(i);
+        }
+    }
+
+    List<Integer> search(String pref) {
+        Trie node = this;
+        for (char c : pref.toCharArray()) {
+            c -= 'a';
+            if (node.children[c] == null) {
+                return Collections.emptyList();
+            }
+            node = node.children[c];
+        }
+        return node.v;
+    }
+}
+
+class Solution {
+    private Trie trie = new Trie();
+    private String[] words;
+    private List<List<String>> ans = new ArrayList<>();
+
+    public List<List<String>> wordSquares(String[] words) {
+        this.words = words;
+        for (int i = 0; i < words.length; ++i) {
+            trie.insert(words[i], i);
+        }
+
+        List<String> t = new ArrayList<>();
+        for (String w : words) {
+            t.add(w);
+            dfs(t);
+            t.remove(t.size() - 1);
+        }
+        return ans;
+    }
+
+    private void dfs(List<String> t) {
+        if (t.size() == words[0].length()) {
+            ans.add(new ArrayList<>(t));
+            return;
+        }
+        int idx = t.size();
+        StringBuilder pref = new StringBuilder();
+        for (String x : t) {
+            pref.append(x.charAt(idx));
+        }
+        List<Integer> indexes = trie.search(pref.toString());
+        for (int i : indexes) {
+            t.add(words[i]);
+            dfs(t);
+            t.remove(t.size() - 1);
+        }
+    }
+}
+```
+
+#### Go
+
+```go
+type Trie struct {
+	children [26]*Trie
+	v        []int
+}
+
+func newTrie() *Trie {
+	return &Trie{}
+}
+func (this *Trie) insert(word string, i int) {
+	node := this
+	for _, c := range word {
+		c -= 'a'
+		if node.children[c] == nil {
+			node.children[c] = newTrie()
+		}
+		node = node.children[c]
+		node.v = append(node.v, i)
+	}
+}
+func (this *Trie) search(word string) []int {
+	node := this
+	for _, c := range word {
+		c -= 'a'
+		if node.children[c] == nil {
+			return []int{}
+		}
+		node = node.children[c]
+	}
+	return node.v
+}
+
+func wordSquares(words []string) [][]string {
+	trie := newTrie()
+	for i, w := range words {
+		trie.insert(w, i)
+	}
+	ans := [][]string{}
+	var dfs func([]string)
+	dfs = func(t []string) {
+		if len(t) == len(words[0]) {
+			cp := make([]string, len(t))
+			copy(cp, t)
+			ans = append(ans, cp)
+			return
+		}
+		idx := len(t)
+		pref := []byte{}
+		for _, v := range t {
+			pref = append(pref, v[idx])
+		}
+		indexes := trie.search(string(pref))
+		for _, i := range indexes {
+			t = append(t, words[i])
+			dfs(t)
+			t = t[:len(t)-1]
+		}
+	}
+	for _, w := range words {
+		dfs([]string{w})
+	}
+	return ans
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- problem:end -->
