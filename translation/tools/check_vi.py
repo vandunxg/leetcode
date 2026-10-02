@@ -55,6 +55,29 @@ _VI_DATA_LINE = re.compile(r"<strong>[^<]*:\s*</strong>(.*)$")
 _TAG = re.compile(r"<[^>]+>")
 _TAG_NAME = re.compile(r"<(/?)([A-Za-z][A-Za-z0-9]*)\b")
 
+_HASH_COMMENT_LANGUAGES = {"python", "py", "ruby", "rb", "shell", "bash", "sh", "nim"}
+_SQL_COMMENT_LANGUAGES = {"sql"}
+_SLASH_COMMENT_LANGUAGES = {
+    "c",
+    "cpp",
+    "java",
+    "javascript",
+    "js",
+    "typescript",
+    "ts",
+    "go",
+    "rust",
+    "rs",
+    "csharp",
+    "cs",
+    "kotlin",
+    "swift",
+    "scala",
+}
+_PROTECTED_COMMENT = re.compile(
+    r"\b(?:noqa|type:\s*ignore|noinspection|pragma|fmt:)\b", re.I
+)
+
 ENGLISH_WORDS = {
     "the",
     "and",
@@ -183,11 +206,14 @@ def without_code_comments(code: str, info: str) -> str:
     return "".join(out)
 
 
+def normalize_code(code: str) -> str:
+    """Ignore equivalent tab/space indentation introduced by Markdown editing."""
+    return code.expandtabs(4)
+
+
 def tab_headings(text: str) -> List[str]:
     out = []
-    for region in re.findall(
-        r"<!-- tabs:start -->(.*?)<!-- tabs:end -->", text, re.S
-    ):
+    for region in re.findall(r"<!-- tabs:start -->(.*?)<!-- tabs:end -->", text, re.S):
         out += re.findall(r"^#### (.*)$", region, re.M)
     return out
 
@@ -208,9 +234,7 @@ def urls(text: str) -> Counter:
 
 def tag_counts(text: str) -> Counter:
     text = _BACKTICK.sub(" ", text)
-    return Counter(
-        f"{close}{name.lower()}" for close, name in _TAG_NAME.findall(text)
-    )
+    return Counter(f"{close}{name.lower()}" for close, name in _TAG_NAME.findall(text))
 
 
 def pre_data_errors(src: str, dst: str) -> List[str]:
@@ -224,9 +248,7 @@ def pre_data_errors(src: str, dst: str) -> List[str]:
         a_lines = a.strip("\n").split("\n")
         b_lines = b.strip("\n").split("\n")
         if len(a_lines) != len(b_lines):
-            errors.append(
-                f"<pre> #{i}: {len(a_lines)} lines in source, {len(b_lines)}"
-            )
+            errors.append(f"<pre> #{i}: {len(a_lines)} lines in source, {len(b_lines)}")
             continue
 
         for j, (x, y) in enumerate(zip(a_lines, b_lines), 1):
@@ -267,9 +289,7 @@ def residual_english(text: str) -> List[str]:
         found = sorted(words & ENGLISH_WORDS)
 
         if len(found) >= 2:
-            hits.append(
-                f"line ~{no}: {found} :: {line.strip()[:90]}"
-            )
+            hits.append(f"line ~{no}: {found} :: {line.strip()[:90]}")
 
     return hits
 
@@ -284,8 +304,14 @@ def check_pair(src_text: str, dst_text: str) -> Tuple[List[str], List[str]]:
 
     src_blocks, src_rest = split_fences(src_text)
     dst_blocks, dst_rest = split_fences(dst_text)
-    src_code = [(info, without_code_comments(body, info)) for info, body in src_blocks]
-    dst_code = [(info, without_code_comments(body, info)) for info, body in dst_blocks]
+    src_code = [
+        (info, normalize_code(without_code_comments(body, info)))
+        for info, body in src_blocks
+    ]
+    dst_code = [
+        (info, normalize_code(without_code_comments(body, info)))
+        for info, body in dst_blocks
+    ]
     if src_code != dst_code:
         errors.append(
             f"code_fences: {len(src_blocks)} in source, {len(dst_blocks)} "
@@ -365,10 +391,7 @@ def main() -> int:
         source = source_for(target)
 
         if not source.is_file():
-            print(
-                f"FAIL {rel}\n  source missing: "
-                f"{source.relative_to(REPO)}"
-            )
+            print(f"FAIL {rel}\n  source missing: " f"{source.relative_to(REPO)}")
             failed += 1
             continue
 
