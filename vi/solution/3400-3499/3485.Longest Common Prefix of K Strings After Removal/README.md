@@ -1,0 +1,580 @@
+---
+comments: true
+difficulty: Hard
+rating: 2289
+source: Biweekly Contest 152 Q3
+tags:
+    - Trie
+    - Array
+    - String
+---
+
+<!-- problem:start -->
+
+# [3485. Longest Common Prefix of K Strings After Removal](https://leetcode.com/problems/longest-common-prefix-of-k-strings-after-removal)
+
+[中文文档](/solution/3400-3499/3485.Longest%20Common%20Prefix%20of%20K%20Strings%20After%20Removal/README.md)
+
+## Mô tả
+
+<!-- description:start -->
+
+<p>Bạn được cho một mảng các chuỗi <code>words</code> và một số nguyên <code>k</code>.</p>
+
+<p>Với mỗi chỉ số <code>i</code> trong đoạn <code>[0, words.length - 1]</code>, hãy tìm <strong>độ dài</strong> của <strong><span data-keyword="string-prefix">tiền tố chung dài nhất</span></strong> của bất kỳ <code>k</code> chuỗi nào (được chọn tại <strong>các chỉ số khác nhau</strong>) trong mảng còn lại sau khi xóa phần tử thứ <code>i<sup>th</sup></code>.</p>
+
+<p>Trả về một mảng <code>answer</code>, trong đó <code>answer[i]</code> là đáp án cho phần tử thứ <code>i<sup>th</sup></code>. Nếu sau khi xóa phần tử thứ <code>i<sup>th</sup></code>, mảng còn ít hơn <code>k</code> chuỗi thì <code>answer[i]</code> là 0.</p>
+
+<p>&nbsp;</p>
+<p><strong class="example">Ví dụ 1:</strong></p>
+
+<div class="example-block">
+<p><strong>Đầu vào:</strong> <span class="example-io">words = [&quot;jump&quot;,&quot;run&quot;,&quot;run&quot;,&quot;jump&quot;,&quot;run&quot;], k = 2</span></p>
+
+<p><strong>Đầu ra:</strong> <span class="example-io">[3,4,4,3,4]</span></p>
+
+<p><strong>Giải thích:</strong></p>
+
+<ul>
+    <li>Xóa chỉ số 0 (<code>&quot;jump&quot;</code>):
+
+    <ul>
+        <li><code>words</code> trở thành: <code>[&quot;run&quot;, &quot;run&quot;, &quot;jump&quot;, &quot;run&quot;]</code>. <code>&quot;run&quot;</code> xuất hiện 3 lần. Chọn bất kỳ hai chuỗi nào, ta được tiền tố chung dài nhất là <code>&quot;run&quot;</code> (độ dài 3).</li>
+    </ul>
+    </li>
+    <li>Xóa chỉ số 1 (<code>&quot;run&quot;</code>):
+    <ul>
+        <li><code>words</code> trở thành: <code>[&quot;jump&quot;, &quot;run&quot;, &quot;jump&quot;, &quot;run&quot;]</code>. <code>&quot;jump&quot;</code> xuất hiện hai lần. Chọn hai chuỗi này, ta được tiền tố chung dài nhất là <code>&quot;jump&quot;</code> (độ dài 4).</li>
+    </ul>
+    </li>
+    <li>Xóa chỉ số 2 (<code>&quot;run&quot;</code>):
+    <ul>
+        <li><code>words</code> trở thành: <code>[&quot;jump&quot;, &quot;run&quot;, &quot;jump&quot;, &quot;run&quot;]</code>. <code>&quot;jump&quot;</code> xuất hiện hai lần. Chọn hai chuỗi này, ta được tiền tố chung dài nhất là <code>&quot;jump&quot;</code> (độ dài 4).</li>
+    </ul>
+    </li>
+    <li>Xóa chỉ số 3 (<code>&quot;jump&quot;</code>):
+    <ul>
+        <li><code>words</code> trở thành: <code>[&quot;jump&quot;, &quot;run&quot;, &quot;run&quot;, &quot;run&quot;]</code>. <code>&quot;run&quot;</code> xuất hiện 3 lần. Chọn bất kỳ hai chuỗi nào, ta được tiền tố chung dài nhất là <code>&quot;run&quot;</code> (độ dài 3).</li>
+    </ul>
+    </li>
+    <li>Xóa chỉ số 4 (&quot;run&quot;):
+    <ul>
+        <li><code>words</code> trở thành: <code>[&quot;jump&quot;, &quot;run&quot;, &quot;run&quot;, &quot;jump&quot;]</code>. <code>&quot;jump&quot;</code> xuất hiện hai lần. Chọn hai chuỗi này, ta được tiền tố chung dài nhất là <code>&quot;jump&quot;</code> (độ dài 4).</li>
+    </ul>
+    </li>
+
+</ul>
+</div>
+
+<p><strong class="example">Ví dụ 2:</strong></p>
+
+<div class="example-block">
+<p><strong>Đầu vào:</strong> <span class="example-io">words = [&quot;dog&quot;,&quot;racer&quot;,&quot;car&quot;], k = 2</span></p>
+
+<p><strong>Đầu ra:</strong> <span class="example-io">[0,0,0]</span></p>
+
+<p><strong>Giải thích:</strong></p>
+
+<ul>
+    <li>Xóa bất kỳ chỉ số nào cũng cho kết quả là 0.</li>
+</ul>
+</div>
+
+<p>&nbsp;</p>
+<p><strong>Ràng buộc:</strong></p>
+
+<ul>
+    <li><code>1 &lt;= k &lt;= words.length &lt;= 10<sup>5</sup></code></li>
+    <li><code>1 &lt;= words[i].length &lt;= 10<sup>4</sup></code></li>
+    <li><code>words[i]</code> chỉ gồm các chữ cái tiếng Anh viết thường.</li>
+    <li>Tổng của các giá trị <code>words[i].length</code> nhỏ hơn hoặc bằng <code>10<sup>5</sup></code>.</li>
+</ul>
+
+<!-- description:end -->
+
+## Lời giải
+
+<!-- solution:start -->
+
+### Lời giải 1
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Với mỗi từ bị xóa, ta cần tìm tiền tố chung dài nhất của bất kỳ $k$ chuỗi nào còn lại. Tổng độ dài thỏa mãn $\le 10^5$, nên không thể xây dựng lại trie cho từng truy vấn.
+>
+> Độ sâu lớn nhất của một node trong trie có số lượng $\ge k$ chính là đáp án tổng thể. Việc xóa một từ chỉ ảnh hưởng đến các node tổ tiên có số lượng đúng bằng $k$.
+>
+> Một segment tree theo độ sâu lưu số node vẫn có số lượng $\ge k$. Ta giảm các độ sâu dễ mất của từ bị xóa, truy vấn độ sâu lớn nhất còn tồn tại rồi khôi phục lại. Nếu $n-1<k$, mọi đáp án đều là $0$.
+
+<!-- thinking:end -->
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+class Solution:
+    def longestCommonPrefix(self, words: List[str], k: int) -> List[int]:
+        n = len(words)
+        ans = [0] * n
+        if n - 1 < k:
+            return ans
+
+        trie = [{'count': 0, 'depth': 0, 'children': [-1] * 26}]
+        for word in words:
+            cur = 0
+            for c in word:
+                idx = ord(c) - 97
+                if trie[cur]['children'][idx] == -1:
+                    trie[cur]['children'][idx] = len(trie)
+                    trie.append(
+                        {
+                            'count': 0,
+                            'depth': trie[cur]['depth'] + 1,
+                            'children': [-1] * 26,
+                        }
+                    )
+                cur = trie[cur]['children'][idx]
+                trie[cur]['count'] += 1
+
+        max_depth = 0
+        for i in range(1, len(trie)):
+            if trie[i]['count'] >= k:
+                max_depth = max(max_depth, trie[i]['depth'])
+
+        global_count = [0] * (max_depth + 1)
+        for i in range(1, len(trie)):
+            node = trie[i]
+            if node['count'] >= k and node['depth'] <= max_depth:
+                global_count[node['depth']] += 1
+
+        fragile_list = [[] for _ in range(n)]
+        for i, word in enumerate(words):
+            cur = 0
+            for c in word:
+                idx = ord(c) - 97
+                cur = trie[cur]['children'][idx]
+                if trie[cur]['count'] == k:
+                    fragile_list[i].append(trie[cur]['depth'])
+
+        seg_size = max_depth
+        if seg_size < 1:
+            return ans
+
+        tree = [-1] * (4 * (seg_size + 1))
+
+        def build(idx: int, l: int, r: int) -> None:
+            if l == r:
+                tree[idx] = l if global_count[l] > 0 else -1
+                return
+            mid = (l + r) // 2
+            build(idx * 2, l, mid)
+            build(idx * 2 + 1, mid + 1, r)
+            tree[idx] = max(tree[idx * 2], tree[idx * 2 + 1])
+
+        def update(idx: int, l: int, r: int, pos: int, new_val: int) -> None:
+            if l == r:
+                tree[idx] = l if new_val > 0 else -1
+                return
+            mid = (l + r) // 2
+            if pos <= mid:
+                update(idx * 2, l, mid, pos, new_val)
+            else:
+                update(idx * 2 + 1, mid + 1, r, pos, new_val)
+            tree[idx] = max(tree[idx * 2], tree[idx * 2 + 1])
+
+        build(1, 1, seg_size)
+        for i in range(n):
+            for d in fragile_list[i]:
+                update(1, 1, seg_size, d, global_count[d] - 1)
+            res = tree[1]
+            ans[i] = 0 if res == -1 else res
+            for d in fragile_list[i]:
+                update(1, 1, seg_size, d, global_count[d])
+        return ans
+```
+
+#### Java
+
+```java
+class Solution {
+    static class TrieNode {
+        int count = 0;
+        int depth = 0;
+        int[] children = new int[26];
+
+        TrieNode() {
+            for (int i = 0; i < 26; ++i) children[i] = -1;
+        }
+    }
+
+    static class SegmentTree {
+        int n;
+        int[] tree;
+        int[] globalCount;
+
+        SegmentTree(int n, int[] globalCount) {
+            this.n = n;
+            this.globalCount = globalCount;
+            this.tree = new int[4 * (n + 1)];
+            for (int i = 0; i < tree.length; i++) tree[i] = -1;
+            build(1, 1, n);
+        }
+
+        void build(int idx, int l, int r) {
+            if (l == r) {
+                tree[idx] = globalCount[l] > 0 ? l : -1;
+                return;
+            }
+            int mid = (l + r) / 2;
+            build(idx * 2, l, mid);
+            build(idx * 2 + 1, mid + 1, r);
+            tree[idx] = Math.max(tree[idx * 2], tree[idx * 2 + 1]);
+        }
+
+        void update(int idx, int l, int r, int pos, int newVal) {
+            if (l == r) {
+                tree[idx] = newVal > 0 ? l : -1;
+                return;
+            }
+            int mid = (l + r) / 2;
+            if (pos <= mid) {
+                update(idx * 2, l, mid, pos, newVal);
+            } else {
+                update(idx * 2 + 1, mid + 1, r, pos, newVal);
+            }
+            tree[idx] = Math.max(tree[idx * 2], tree[idx * 2 + 1]);
+        }
+
+        int query() {
+            return tree[1];
+        }
+    }
+
+    public int[] longestCommonPrefix(String[] words, int k) {
+        int n = words.length;
+        int[] ans = new int[n];
+        if (n - 1 < k) return ans;
+
+        ArrayList<TrieNode> trie = new ArrayList<>();
+        trie.add(new TrieNode());
+
+        for (String word : words) {
+            int cur = 0;
+            for (char c : word.toCharArray()) {
+                int idx = c - 'a';
+                if (trie.get(cur).children[idx] == -1) {
+                    trie.get(cur).children[idx] = trie.size();
+                    TrieNode node = new TrieNode();
+                    node.depth = trie.get(cur).depth + 1;
+                    trie.add(node);
+                }
+                cur = trie.get(cur).children[idx];
+                trie.get(cur).count++;
+            }
+        }
+
+        int maxDepth = 0;
+        for (int i = 1; i < trie.size(); ++i) {
+            if (trie.get(i).count >= k) {
+                maxDepth = Math.max(maxDepth, trie.get(i).depth);
+            }
+        }
+
+        int[] globalCount = new int[maxDepth + 1];
+        for (int i = 1; i < trie.size(); ++i) {
+            TrieNode node = trie.get(i);
+            if (node.count >= k && node.depth <= maxDepth) {
+                globalCount[node.depth]++;
+            }
+        }
+
+        List<List<Integer>> fragileList = new ArrayList<>();
+        for (int i = 0; i < n; ++i) {
+            fragileList.add(new ArrayList<>());
+        }
+
+        for (int i = 0; i < n; ++i) {
+            int cur = 0;
+            for (char c : words[i].toCharArray()) {
+                int idx = c - 'a';
+                cur = trie.get(cur).children[idx];
+                if (trie.get(cur).count == k) {
+                    fragileList.get(i).add(trie.get(cur).depth);
+                }
+            }
+        }
+
+        int segSize = maxDepth;
+        if (segSize >= 1) {
+            SegmentTree segTree = new SegmentTree(segSize, globalCount);
+            for (int i = 0; i < n; ++i) {
+                if (n - 1 < k) {
+                    ans[i] = 0;
+                } else {
+                    for (int d : fragileList.get(i)) {
+                        segTree.update(1, 1, segSize, d, globalCount[d] - 1);
+                    }
+                    int res = segTree.query();
+                    ans[i] = res == -1 ? 0 : res;
+                    for (int d : fragileList.get(i)) {
+                        segTree.update(1, 1, segSize, d, globalCount[d]);
+                    }
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+#### C++
+
+```cpp
+class Solution {
+public:
+    struct TrieNode {
+        int count = 0;
+        int depth = 0;
+        int children[26] = {0};
+    };
+
+    class SegmentTree {
+    public:
+        int n;
+        vector<int> tree;
+        vector<int>& globalCount;
+        SegmentTree(int n, vector<int>& globalCount)
+
+            : n(n)
+
+            , globalCount(globalCount) {
+
+            tree.assign(4 * (n + 1), -1);
+            build(1, 1, n);
+        }
+        void build(int idx, int l, int r) {
+            if (l == r) {
+                tree[idx] = globalCount[l] > 0 ? l : -1;
+                return;
+            }
+            int mid = (l + r) / 2;
+            build(idx * 2, l, mid);
+            build(idx * 2 + 1, mid + 1, r);
+            tree[idx] = max(tree[idx * 2], tree[idx * 2 + 1]);
+        }
+        void update(int idx, int l, int r, int pos, int newVal) {
+            if (l == r) {
+                tree[idx] = newVal > 0 ? l : -1;
+                return;
+            }
+            int mid = (l + r) / 2;
+            if (pos <= mid)
+                update(idx * 2, l, mid, pos, newVal);
+            else
+                update(idx * 2 + 1, mid + 1, r, pos, newVal);
+            tree[idx] = max(tree[idx * 2], tree[idx * 2 + 1]);
+        }
+        int query() {
+            return tree[1];
+        }
+    };
+
+    vector<int> longestCommonPrefix(vector<string>& words, int k) {
+        int n = words.size();
+        vector<int> ans(n, 0);
+        if (n - 1 < k) return ans;
+        vector<TrieNode> trie(1);
+        for (const string& word : words) {
+            int cur = 0;
+            for (char c : word) {
+                int idx = c - 'a';
+                if (trie[cur].children[idx] == 0) {
+                    trie[cur].children[idx] = trie.size();
+                    trie.push_back({0, trie[cur].depth + 1});
+                }
+                cur = trie[cur].children[idx];
+                trie[cur].count++;
+            }
+        }
+        int maxDepth = 0;
+        for (int i = 1; i < trie.size(); ++i) {
+            if (trie[i].count >= k) {
+                maxDepth = max(maxDepth, trie[i].depth);
+            }
+        }
+        vector<int> globalCount(maxDepth + 1, 0);
+        for (int i = 1; i < trie.size(); ++i) {
+            if (trie[i].count >= k && trie[i].depth <= maxDepth) {
+                globalCount[trie[i].depth]++;
+            }
+        }
+        vector<vector<int>> fragileList(n);
+        for (int i = 0; i < n; ++i) {
+            int cur = 0;
+            for (char c : words[i]) {
+                int idx = c - 'a';
+                cur = trie[cur].children[idx];
+                if (trie[cur].count == k) {
+                    fragileList[i].push_back(trie[cur].depth);
+                }
+            }
+        }
+        int segSize = maxDepth;
+        if (segSize >= 1) {
+            SegmentTree segTree(segSize, globalCount);
+            for (int i = 0; i < n; ++i) {
+                if (n - 1 < k) {
+                    ans[i] = 0;
+                } else {
+                    for (int d : fragileList[i]) {
+                        segTree.update(1, 1, segSize, d, globalCount[d] - 1);
+                    }
+                    int res = segTree.query();
+                    ans[i] = res == -1 ? 0 : res;
+                    for (int d : fragileList[i]) {
+                        segTree.update(1, 1, segSize, d, globalCount[d]);
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+#### Go
+
+```go
+type trieNode struct {
+    count    int
+    depth    int
+    children [26]int
+}
+
+func longestCommonPrefix(words []string, k int) []int {
+    n := len(words)
+    ans := make([]int, n)
+    if n-1 < k {
+        return ans
+    }
+
+    trie := []trieNode{{}}
+    for i := range trie[0].children {
+        trie[0].children[i] = -1
+    }
+    for _, word := range words {
+        cur := 0
+        for _, c := range word {
+            idx := int(c - 'a')
+            if trie[cur].children[idx] == -1 {
+                trie[cur].children[idx] = len(trie)
+                node := trieNode{depth: trie[cur].depth + 1}
+                for j := range node.children {
+                    node.children[j] = -1
+                }
+                trie = append(trie, node)
+            }
+            cur = trie[cur].children[idx]
+            trie[cur].count++
+        }
+    }
+
+    maxDepth := 0
+    for i := 1; i < len(trie); i++ {
+        if trie[i].count >= k {
+            maxDepth = max(maxDepth, trie[i].depth)
+        }
+    }
+
+    globalCount := make([]int, maxDepth+1)
+    for i := 1; i < len(trie); i++ {
+        if trie[i].count >= k && trie[i].depth <= maxDepth {
+            globalCount[trie[i].depth]++
+        }
+    }
+
+    fragileList := make([][]int, n)
+    for i, word := range words {
+        cur := 0
+        for _, c := range word {
+            idx := int(c - 'a')
+            cur = trie[cur].children[idx]
+            if trie[cur].count == k {
+                fragileList[i] = append(fragileList[i], trie[cur].depth)
+            }
+        }
+    }
+
+    segSize := maxDepth
+    if segSize < 1 {
+        return ans
+    }
+
+    tree := make([]int, 4*(segSize+1))
+    for i := range tree {
+        tree[i] = -1
+    }
+
+    var build func(idx, l, r int)
+    build = func(idx, l, r int) {
+        if l == r {
+            if globalCount[l] > 0 {
+                tree[idx] = l
+            } else {
+                tree[idx] = -1
+            }
+            return
+        }
+        mid := (l + r) / 2
+        build(idx*2, l, mid)
+        build(idx*2+1, mid+1, r)
+        tree[idx] = max(tree[idx*2], tree[idx*2+1])
+    }
+
+    var update func(idx, l, r, pos, newVal int)
+    update = func(idx, l, r, pos, newVal int) {
+        if l == r {
+            if newVal > 0 {
+                tree[idx] = l
+            } else {
+                tree[idx] = -1
+            }
+            return
+        }
+        mid := (l + r) / 2
+        if pos <= mid {
+            update(idx*2, l, mid, pos, newVal)
+        } else {
+            update(idx*2+1, mid+1, r, pos, newVal)
+        }
+        tree[idx] = max(tree[idx*2], tree[idx*2+1])
+    }
+
+    build(1, 1, segSize)
+    for i := 0; i < n; i++ {
+        for _, d := range fragileList[i] {
+            update(1, 1, segSize, d, globalCount[d]-1)
+        }
+        res := tree[1]
+        if res == -1 {
+            ans[i] = 0
+        } else {
+            ans[i] = res
+        }
+        for _, d := range fragileList[i] {
+            update(1, 1, segSize, d, globalCount[d])
+        }
+    }
+    return ans
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- problem:end -->
