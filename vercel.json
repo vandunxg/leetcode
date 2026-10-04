@@ -5,6 +5,17 @@
     "buildCommand": "bash vi/site/vercel-build.sh",
     "outputDirectory": "site",
     "ignoreCommand": "bash vi/site/vercel-ignore.sh",
-    "trailingSlash": true,
-    "redirects": [{ "source": "/", "destination": "/vi/", "permanent": false }]
+    "redirects": [
+        { "source": "/", "destination": "/vi/", "permanent": false },
+        {
+            "source": "/:path((?:[^/]+/)*[^/.]+)",
+            "destination": "/:path/",
+            "permanent": true
+        },
+        {
+            "source": "/vi/lcci/:id(\\d+\\.\\d+)",
+            "destination": "/vi/lcci/:id/",
+            "permanent": true
+        }
+    ]
 }
