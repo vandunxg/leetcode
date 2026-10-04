@@ -1,0 +1,584 @@
+---
+comments: true
+difficulty: Hard
+rating: 2402
+source: Weekly Contest 421 Q3
+tags:
+    - Array
+    - Math
+    - Dynamic Programming
+    - Greatest Common Divisor
+    - Number Theory
+    - Euclidean Algorithm
+---
+
+<!-- problem:start -->
+
+# [3336. Find the Number of Subsequences With Equal GCD](https://leetcode.com/problems/find-the-number-of-subsequences-with-equal-gcd)
+
+[中文文档](/solution/3300-3399/3336.Find%20the%20Number%20of%20Subsequences%20With%20Equal%20GCD/README.md)
+
+## Mô tả
+
+<!-- description:start -->
+
+<p>Bạn được cho một mảng số nguyên <code>nums</code>.</p>
+
+<p>Nhiệm vụ của bạn là tìm số cặp <strong>không rỗng</strong> gồm các <span data-keyword="subsequence-array">dãy con</span> <code>(seq1, seq2)</code> của <code>nums</code> thỏa mãn các điều kiện sau:</p>
+
+<ul>
+    <li>Hai dãy con <code>seq1</code> và <code>seq2</code> <strong>không giao nhau</strong>, nghĩa là <strong>không có chỉ số nào</strong> của <code>nums</code> xuất hiện trong cả hai dãy.</li>
+    <li><span data-keyword="gcd-function">GCD</span> của các phần tử trong <code>seq1</code> bằng GCD của các phần tử trong <code>seq2</code>.</li>
+</ul>
+
+<p>Trả về tổng số cặp như vậy.</p>
+
+<p>Vì đáp án có thể rất lớn, hãy trả về đáp án <strong>lấy modulo</strong> <code>10<sup>9</sup> + 7</code>.</p>
+
+<p>&nbsp;</p>
+<p><strong class="example">Ví dụ 1:</strong></p>
+
+<div class="example-block">
+<p><strong>Đầu vào:</strong> <span class="example-io">nums = [1,2,3,4]</span></p>
+
+<p><strong>Đầu ra:</strong> <span class="example-io">10</span></p>
+
+<p><strong>Giải thích:</strong></p>
+
+<p>Các cặp dãy con có GCD của các phần tử bằng 1 là:</p>
+
+<ul>
+    <li><code>([<strong><u>1</u></strong>, 2, 3, 4], [1, <strong><u>2</u></strong>, <strong><u>3</u></strong>, 4])</code></li>
+    <li><code>([<strong><u>1</u></strong>, 2, 3, 4], [1, <strong><u>2</u></strong>, <strong><u>3</u></strong>, <strong><u>4</u></strong>])</code></li>
+    <li><code>([<strong><u>1</u></strong>, 2, 3, 4], [1, 2, <strong><u>3</u></strong>, <strong><u>4</u></strong>])</code></li>
+    <li><code>([<strong><u>1</u></strong>, <strong><u>2</u></strong>, 3, 4], [1, 2, <strong><u>3</u></strong>, <strong><u>4</u></strong>])</code></li>
+    <li><code>([<strong><u>1</u></strong>, 2, 3, <strong><u>4</u></strong>], [1, <strong><u>2</u></strong>, <strong><u>3</u></strong>, 4])</code></li>
+    <li><code>([1, <strong><u>2</u></strong>, <strong><u>3</u></strong>, 4], [<strong><u>1</u></strong>, 2, 3, 4])</code></li>
+    <li><code>([1, <strong><u>2</u></strong>, <strong><u>3</u></strong>, 4], [<strong><u>1</u></strong>, 2, 3, <strong><u>4</u></strong>])</code></li>
+    <li><code>([1, <strong><u>2</u></strong>, <strong><u>3</u></strong>, <strong><u>4</u></strong>], [<strong><u>1</u></strong>, 2, 3, 4])</code></li>
+    <li><code>([1, 2, <strong><u>3</u></strong>, <strong><u>4</u></strong>], [<strong><u>1</u></strong>, 2, 3, 4])</code></li>
+    <li><code>([1, 2, <strong><u>3</u></strong>, <strong><u>4</u></strong>], [<strong><u>1</u></strong>, <strong><u>2</u></strong>, 3, 4])</code></li>
+</ul>
+</div>
+
+<p><strong class="example">Ví dụ 2:</strong></p>
+
+<div class="example-block">
+<p><strong>Đầu vào:</strong> <span class="example-io">nums = [10,20,30]</span></p>
+
+<p><strong>Đầu ra:</strong> <span class="example-io">2</span></p>
+
+<p><strong>Giải thích:</strong></p>
+
+<p>Các cặp dãy con có GCD của các phần tử bằng 10 là:</p>
+
+<ul>
+    <li><code>([<strong><u>10</u></strong>, 20, 30], [10, <strong><u>20</u></strong>, <strong><u>30</u></strong>])</code></li>
+    <li><code>([10, <strong><u>20</u></strong>, <strong><u>30</u></strong>], [<strong><u>10</u></strong>, 20, 30])</code></li>
+</ul>
+</div>
+
+<p><strong class="example">Ví dụ 3:</strong></p>
+
+<div class="example-block">
+<p><strong>Đầu vào:</strong> <span class="example-io">nums = [1,1,1,1]</span></p>
+
+<p><strong>Đầu ra:</strong> <span class="example-io">50</span></p>
+</div>
+
+<p>&nbsp;</p>
+<p><strong>Ràng buộc:</strong></p>
+
+<ul>
+    <li><code>1 &lt;= nums.length &lt;= 200</code></li>
+    <li><code>1 &lt;= nums[i] &lt;= 200</code></li>
+</ul>
+
+<!-- description:end -->
+
+## Lời giải
+
+<!-- solution:start -->
+
+### Lời giải 1: Ghi nhớ
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Ta đếm các cặp dãy con không giao nhau có cùng GCD. Với $n,M \le 200$, việc ghi nhớ theo chỉ số và hai GCD đang có khoảng $n M^2$ trạng thái.
+>
+> Mỗi giá trị có thể được bỏ qua, gộp vào GCD thứ nhất hoặc gộp vào GCD thứ hai; GCD của dãy con rỗng được quy ước là $0$.
+>
+> Một trạng thái kết thúc hợp lệ khi hai GCD bằng nhau. Lời gọi ban đầu bao gồm trường hợp cả hai dãy con đều rỗng, nên ta trừ $1$ trước khi lấy modulo $10^9+7$.
+
+<!-- thinking:end -->
+
+Ta định nghĩa hàm $\textit{dfs}(i, j, k)$ là số cách khi xét các phần tử có chỉ số từ $0 \sim i$, trong đó GCD hiện tại của dãy con thứ nhất là $j$ và của dãy con thứ hai là $k$. Theo quy ước, GCD của dãy con rỗng là $0$, và $\gcd(x, 0) = x$.
+
+Với phần tử tại chỉ số $i$, có ba lựa chọn:
+
+1. Bỏ qua phần tử này: chuyển sang $\textit{dfs}(i - 1, j, k)$;
+2. Đưa phần tử này vào dãy con thứ nhất: chuyển sang $\textit{dfs}(i - 1, \gcd(\textit{nums}[i], j), k)$;
+3. Đưa phần tử này vào dãy con thứ hai: chuyển sang $\textit{dfs}(i - 1, j, \gcd(\textit{nums}[i], k))$.
+
+Trường hợp cơ sở: khi $i \lt 0$, trả về $1$ nếu $j = k$, ngược lại trả về $0$.
+
+Lời gọi ban đầu $\textit{dfs}(n - 1, 0, 0)$ đếm tất cả các cặp có GCD bằng nhau, bao gồm trường hợp cả hai dãy con đều rỗng. Vì vậy, ta trừ $1$ rồi lấy kết quả modulo $10^9 + 7$.
+
+Độ phức tạp thời gian là $O(n \times m^2 \times \log m)$, còn độ phức tạp không gian là $O(n \times m^2)$, trong đó $n$ là độ dài mảng và $m$ là giá trị lớn nhất trong mảng.
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+class Solution:
+    def subsequencePairCount(self, nums: List[int]) -> int:
+        @cache
+        def dfs(i: int, j: int, k: int) -> int:
+            if i < 0:
+                return int(j == k)
+            return (
+                dfs(i - 1, j, k)
+                + dfs(i - 1, gcd(nums[i], j), k)
+                + dfs(i - 1, j, gcd(nums[i], k))
+            ) % mod
+
+        mod = 10**9 + 7
+        return (dfs(len(nums) - 1, 0, 0) - 1) % mod
+```
+
+#### Java
+
+```java
+class Solution {
+    private int[] nums;
+    private Integer[][][] f;
+    private static final int MOD = 1_000_000_007;
+
+    public int subsequencePairCount(int[] nums) {
+        this.nums = nums;
+        int n = nums.length;
+        int m = 0;
+        for (int x : nums) {
+            if (x > m) m = x;
+        }
+        this.f = new Integer[n + 1][m + 1][m + 1];
+        return (dfs(n, 0, 0) - 1 + MOD) % MOD;
+    }
+
+    private int dfs(int i, int j, int k) {
+        if (i == 0) {
+            return j == k ? 1 : 0;
+        }
+        if (f[i][j][k] != null) {
+            return f[i][j][k];
+        }
+        int x = nums[i - 1];
+        int res = ((dfs(i - 1, j, k) + dfs(i - 1, gcd(x, j), k)) % MOD + dfs(i - 1, j, gcd(x, k)))
+            % MOD;
+        f[i][j][k] = res;
+        return res;
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+#### C++
+
+```cpp
+class Solution {
+public:
+    int subsequencePairCount(vector<int>& nums) {
+        const int MOD = 1e9 + 7;
+        int n = nums.size();
+        int m = ranges::max(nums);
+        vector f(n, vector(m + 1, vector<int>(m + 1, -1)));
+        auto dfs = [&](this auto&& dfs, int i, int j, int k) -> int {
+            if (i < 0) {
+                return j == k;
+            }
+            int& res = f[i][j][k];
+            if (res < 0) {
+                res = ((dfs(i - 1, j, k)
+                           + dfs(i - 1, gcd(nums[i], j), k))
+                              % MOD
+                          + dfs(i - 1, j, gcd(nums[i], k)))
+                    % MOD;
+            }
+            return res;
+        };
+        return (dfs(n - 1, 0, 0) - 1 + MOD) % MOD;
+    }
+};
+```
+
+#### Go
+
+```go
+func subsequencePairCount(nums []int) int {
+    const mod = 1_000_000_007
+    n := len(nums)
+    m := slices.Max(nums)
+    f := make([][][]int, n)
+    for i := range f {
+        f[i] = make([][]int, m+1)
+        for j := range f[i] {
+            f[i][j] = make([]int, m+1)
+            for k := range f[i][j] {
+                f[i][j][k] = -1
+            }
+        }
+    }
+    var gcd func(int, int) int
+    gcd = func(a, b int) int {
+        if b == 0 {
+            return a
+        }
+        return gcd(b, a%b)
+    }
+    var dfs func(i, j, k int) int
+    dfs = func(i, j, k int) int {
+        if i < 0 {
+            if j == k {
+                return 1
+            }
+            return 0
+        }
+        res := &f[i][j][k]
+        if *res < 0 {
+            x := nums[i]
+            *res = ((dfs(i-1, j, k)+
+                dfs(i-1, gcd(x, j), k))%mod +
+                dfs(i-1, j, gcd(x, k))) % mod
+        }
+        return *res
+    }
+    return (dfs(n-1, 0, 0) - 1 + mod) % mod
+}
+```
+
+#### TypeScript
+
+```ts
+function subsequencePairCount(nums: number[]): number {
+    const mod = 1_000_000_007;
+    const n = nums.length;
+    const m = Math.max(...nums);
+    const f: number[][][] = Array.from({ length: n }, () =>
+        Array.from({ length: m + 1 }, () => new Array(m + 1).fill(-1)),
+    );
+    const gcd = (a: number, b: number): number => {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b !== 0) {
+            [a, b] = [b, a % b];
+        }
+        return a;
+    };
+    const dfs = (i: number, j: number, k: number): number => {
+        if (i < 0) {
+            return j === k ? 1 : 0;
+        }
+        let res = f[i][j][k];
+        if (res < 0) {
+            const x = nums[i];
+            res =
+                (((dfs(i - 1, j, k) + dfs(i - 1, gcd(x, j), k)) % mod) + dfs(i - 1, j, gcd(x, k))) %
+                mod;
+            f[i][j][k] = res;
+        }
+        return res;
+    };
+    return (((dfs(n - 1, 0, 0) - 1) % mod) + mod) % mod;
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- solution:start -->
+
+### Lời giải 2: Quy hoạch động
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Phương pháp đệ quy có ghi nhớ phải trả giá cho độ sâu lời gọi và một bảng nhớ ba chiều. Các chuyển trạng thái tương tự có thể dùng với một bảng cuốn chiếu: một trạng thái mới $g$ nhận ba lựa chọn cho $x$.
+>
+> Không gian giảm từ $O(n M^2)$ xuống $O(M^2)$ và không cần đệ quy. Đáp án vẫn là tổng trên đường chéo trừ đi một.
+>
+> Bỏ qua các ô có giá trị 0 trong $f$ giúp giảm thêm hằng số trong thực tế.
+
+<!-- thinking:end -->
+
+Ta có thể chuyển phương pháp ghi nhớ trong Lời giải 1 thành quy hoạch động lặp.
+
+Định nghĩa $f[j][k]$ là số cách sau khi đã xử lý các phần tử hiện tại, sao cho GCD của dãy con thứ nhất là $j$ và của dãy con thứ hai là $k$. Ban đầu, $f[0][0] = 1$.
+
+Với mỗi phần tử $x$, chuyển sang mảng mới $g$:
+
+$$
+\begin{aligned}
+g[j][k] &\mathrel{+}= f[j][k], \\
+g[\gcd(j, x)][k] &\mathrel{+}= f[j][k], \\
+g[j][\gcd(k, x)] &\mathrel{+}= f[j][k].
+\end{aligned}
+$$
+
+Ba chuyển trạng thái này lần lượt tương ứng với việc bỏ qua $x$, đưa $x$ vào dãy con thứ nhất và đưa $x$ vào dãy con thứ hai. Sau khi xử lý tất cả phần tử, đáp án là $\sum_{i=0}^{m} f[i][i] - 1$, lấy modulo $10^9 + 7$.
+
+Độ phức tạp thời gian là $O(n \times m^2 \times \log m)$, còn độ phức tạp không gian là $O(m^2)$, trong đó $n$ là độ dài mảng và $m$ là giá trị lớn nhất trong mảng.
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+class Solution:
+    def subsequencePairCount(self, nums: List[int]) -> int:
+        mod = 10**9 + 7
+        m = max(nums)
+        f = [[0] * (m + 1) for _ in range(m + 1)]
+        f[0][0] = 1
+        for x in nums:
+            g = [[0] * (m + 1) for _ in range(m + 1)]
+            for j in range(m + 1):
+                for k in range(m + 1):
+                    if f[j][k] == 0:
+                        continue
+                    v = f[j][k]
+                    g[j][k] = (g[j][k] + v) % mod
+                    gj, gk = gcd(j, x), gcd(k, x)
+                    g[gj][k] = (g[gj][k] + v) % mod
+                    g[j][gk] = (g[j][gk] + v) % mod
+            f = g
+        return (sum(f[i][i] for i in range(m + 1)) - 1) % mod
+```
+
+#### Java
+
+```java
+class Solution {
+    public int subsequencePairCount(int[] nums) {
+        final int MOD = 1_000_000_007;
+        int m = 0;
+        for (int x : nums) {
+            m = Math.max(m, x);
+        }
+        int[][] f = new int[m + 1][m + 1];
+        f[0][0] = 1;
+        for (int x : nums) {
+            int[][] g = new int[m + 1][m + 1];
+            for (int j = 0; j <= m; ++j) {
+                for (int k = 0; k <= m; ++k) {
+                    if (f[j][k] == 0) {
+                        continue;
+                    }
+                    int v = f[j][k];
+                    g[j][k] = (g[j][k] + v) % MOD;
+                    int gj = gcd(j, x), gk = gcd(k, x);
+                    g[gj][k] = (g[gj][k] + v) % MOD;
+                    g[j][gk] = (g[j][gk] + v) % MOD;
+                }
+            }
+            f = g;
+        }
+        long ans = 0;
+        for (int i = 0; i <= m; ++i) {
+            ans += f[i][i];
+        }
+        return (int) ((ans - 1 + MOD) % MOD);
+    }
+
+    private int gcd(int a, int b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+}
+```
+
+#### C++
+
+```cpp
+class Solution {
+public:
+    int subsequencePairCount(vector<int>& nums) {
+        const int MOD = 1e9 + 7;
+        int m = ranges::max(nums);
+        vector f(m + 1, vector<int>(m + 1));
+        f[0][0] = 1;
+        for (int x : nums) {
+            vector g(m + 1, vector<int>(m + 1));
+            for (int j = 0; j <= m; ++j) {
+                for (int k = 0; k <= m; ++k) {
+                    if (f[j][k] == 0) {
+                        continue;
+                    }
+                    int v = f[j][k];
+                    g[j][k] = (g[j][k] + v) % MOD;
+                    int gj = gcd(j, x), gk = gcd(k, x);
+                    g[gj][k] = (g[gj][k] + v) % MOD;
+                    g[j][gk] = (g[j][gk] + v) % MOD;
+                }
+            }
+            f.swap(g);
+        }
+        long long ans = 0;
+        for (int i = 0; i <= m; ++i) {
+            ans += f[i][i];
+        }
+        return (ans - 1 + MOD) % MOD;
+    }
+};
+```
+
+#### Go
+
+```go
+func subsequencePairCount(nums []int) int {
+    const mod = 1_000_000_007
+    m := slices.Max(nums)
+    f := make([][]int, m+1)
+    for i := range f {
+        f[i] = make([]int, m+1)
+    }
+    f[0][0] = 1
+    gcd := func(a, b int) int {
+        for b != 0 {
+            a, b = b, a%b
+        }
+        return a
+    }
+    for _, x := range nums {
+        g := make([][]int, m+1)
+        for i := range g {
+            g[i] = make([]int, m+1)
+        }
+        for j := 0; j <= m; j++ {
+            for k := 0; k <= m; k++ {
+                if f[j][k] == 0 {
+                    continue
+                }
+                v := f[j][k]
+                g[j][k] = (g[j][k] + v) % mod
+                gj, gk := gcd(j, x), gcd(k, x)
+                g[gj][k] = (g[gj][k] + v) % mod
+                g[j][gk] = (g[j][gk] + v) % mod
+            }
+        }
+        f = g
+    }
+    ans := 0
+    for i := 0; i <= m; i++ {
+        ans += f[i][i]
+    }
+    return (ans - 1 + mod) % mod
+}
+```
+
+#### TypeScript
+
+```ts
+function subsequencePairCount(nums: number[]): number {
+    const mod = 1_000_000_007;
+    const m = Math.max(...nums);
+    let f: number[][] = Array.from({ length: m + 1 }, () => Array(m + 1).fill(0));
+    f[0][0] = 1;
+    const gcd = (a: number, b: number): number => {
+        while (b !== 0) {
+            [a, b] = [b, a % b];
+        }
+        return a;
+    };
+    for (const x of nums) {
+        const g: number[][] = Array.from({ length: m + 1 }, () => Array(m + 1).fill(0));
+        for (let j = 0; j <= m; ++j) {
+            for (let k = 0; k <= m; ++k) {
+                if (f[j][k] === 0) {
+                    continue;
+                }
+                const v = f[j][k];
+                g[j][k] = (g[j][k] + v) % mod;
+                const gj = gcd(j, x);
+                const gk = gcd(k, x);
+                g[gj][k] = (g[gj][k] + v) % mod;
+                g[j][gk] = (g[j][gk] + v) % mod;
+            }
+        }
+        f = g;
+    }
+    let ans = 0;
+    for (let i = 0; i <= m; ++i) {
+        ans += f[i][i];
+    }
+    return (((ans - 1) % mod) + mod) % mod;
+}
+```
+
+#### Rust
+
+```rust
+impl Solution {
+    pub fn subsequence_pair_count(nums: Vec<i32>) -> i32 {
+        fn gcd(mut first: usize, mut second: usize) -> usize {
+            while second != 0 {
+                let remainder = first % second;
+                first = second;
+                second = remainder;
+            }
+            first
+        }
+        const MOD: i32 = 1_000_000_007;
+        const GCD_STATE_COUNT: usize = 201;
+        let mut dp = [[0i32; GCD_STATE_COUNT]; GCD_STATE_COUNT];
+        dp[0][0] = 1;
+        for &num in nums.iter() {
+            let value = num as usize;
+            let mut gcd_with_value = [0usize; GCD_STATE_COUNT];
+            for gcd_value in 0..GCD_STATE_COUNT {
+                gcd_with_value[gcd_value] = gcd(gcd_value, value);
+            }
+            let mut next_dp = dp;
+            for first_gcd in 0..GCD_STATE_COUNT {
+                for second_gcd in 0..GCD_STATE_COUNT {
+                    let count = dp[first_gcd][second_gcd];
+                    if count == 0 {
+                        continue;
+                    }
+                    let next_first_gcd = gcd_with_value[first_gcd];
+                    let next_second_gcd = gcd_with_value[second_gcd];
+                    next_dp[next_first_gcd][second_gcd] += count;
+                    if next_dp[next_first_gcd][second_gcd] >= MOD {
+                        next_dp[next_first_gcd][second_gcd] -= MOD;
+                    }
+                    next_dp[first_gcd][next_second_gcd] += count;
+                    if next_dp[first_gcd][next_second_gcd] >= MOD {
+                        next_dp[first_gcd][next_second_gcd] -= MOD;
+                    }
+                }
+            }
+            dp = next_dp;
+        }
+        let mut answer = 0;
+        for gcd_value in 1..GCD_STATE_COUNT {
+            answer += dp[gcd_value][gcd_value];
+            if answer >= MOD {
+                answer -= MOD;
+            }
+        }
+        answer
+    }
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- problem:end -->
