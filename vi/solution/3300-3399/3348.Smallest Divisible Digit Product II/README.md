@@ -1,0 +1,780 @@
+---
+comments: true
+difficulty: Hard
+rating: 3101
+source: Biweekly Contest 143 Q4
+tags:
+    - Greedy
+    - Math
+    - String
+    - Backtracking
+    - Number Theory
+---
+
+<!-- problem:start -->
+
+# [3348. Smallest Divisible Digit Product II](https://leetcode.com/problems/smallest-divisible-digit-product-ii)
+
+[中文文档](/solution/3300-3399/3348.Smallest%20Divisible%20Digit%20Product%20II/README.md)
+
+## Mô tả
+
+<!-- description:start -->
+
+<p>Cho một chuỗi <code>num</code> biểu diễn một số nguyên <strong>dương</strong> và một số nguyên <code>t</code>.</p>
+
+<p>Một số được gọi là <strong>không chứa chữ số 0</strong> nếu <em>không có chữ số nào</em> của nó là 0.</p>
+
+<p>Hãy trả về một chuỗi biểu diễn số <strong>nhỏ nhất</strong>, <strong>không chứa chữ số 0</strong>, lớn hơn hoặc bằng <code>num</code>, sao cho <strong>tích các chữ số</strong> của nó chia hết cho <code>t</code>. Nếu không tồn tại số như vậy, hãy trả về <code>&quot;-1&quot;</code>.</p>
+
+<p>&nbsp;</p>
+<p><strong class="example">Ví dụ 1:</strong></p>
+
+<div class="example-block">
+<p><strong>Đầu vào:</strong> <span class="example-io">num = &quot;1234&quot;, t = 256</span></p>
+
+<p><strong>Đầu ra:</strong> <span class="example-io">&quot;1488&quot;</span></p>
+
+<p><strong>Giải thích:</strong></p>
+
+<p>Số nhỏ nhất không chứa chữ số 0, lớn hơn 1234 và có tích các chữ số chia hết cho 256 là 1488, với tích các chữ số bằng 256.</p>
+</div>
+
+<p><strong class="example">Ví dụ 2:</strong></p>
+
+<div class="example-block">
+<p><strong>Đầu vào:</strong> <span class="example-io">num = &quot;12355&quot;, t = 50</span></p>
+
+<p><strong>Đầu ra:</strong> <span class="example-io">&quot;12355&quot;</span></p>
+
+<p><strong>Giải thích:</strong></p>
+
+<p>12355 đã không chứa chữ số 0 và tích các chữ số chia hết cho 50, với tích các chữ số bằng 150.</p>
+</div>
+
+<p><strong class="example">Ví dụ 3:</strong></p>
+
+<div class="example-block">
+<p><strong>Đầu vào:</strong> <span class="example-io">num = &quot;11111&quot;, t = 26</span></p>
+
+<p><strong>Đầu ra:</strong> <span class="example-io">&quot;-1&quot;</span></p>
+
+<p><strong>Giải thích:</strong></p>
+
+<p>Không có số nào lớn hơn 11111 có tích các chữ số chia hết cho 26.</p>
+</div>
+
+<p>&nbsp;</p>
+<p><strong>Ràng buộc:</strong></p>
+
+<ul>
+    <li><code>2 &lt;= num.length &lt;= 2 * 10<sup>5</sup></code></li>
+    <li><code>num</code> chỉ gồm các chữ số trong khoảng <code>[&#39;0&#39;, &#39;9&#39;]</code>.</li>
+    <li><code>num</code> không chứa các số 0 ở đầu.</li>
+    <li><code>1 &lt;= t &lt;= 10<sup>14</sup></code></li>
+</ul>
+
+<!-- description:end -->
+
+## Lời giải
+
+<!-- solution:start -->
+
+### Lời giải 1
+
+<!-- thinking:start -->
+
+> **Tư duy**
+>
+> Ta cần tìm số nguyên nhỏ nhất không chứa chữ số 0, lớn hơn hoặc bằng $\textit{num}$ và có tích các chữ số chia hết cho $t$. Với $|\textit{num}| \le 2 \times 10^5$, ta không thể tăng dần từ $n$.
+>
+> Nếu $t$ có thừa số nguyên tố khác $2,3,5,7$ thì không có đáp án. Ngược lại, ta gộp các thừa số nguyên tố còn lại vào các chữ số $8,9,6,4$ để tối thiểu hóa độ dài.
+>
+> Ta duyệt từ phải sang trái, thử tăng một chữ số rồi điền phần hậu tố bằng các số 1 cùng những chữ số đã gộp; nếu độ dài hiện tại quá ngắn thì thêm các số 1 ở đầu. Cách này tạo ra số hợp lệ nhỏ nhất theo thứ tự từ điển.
+
+<!-- thinking:end -->
+
+<!-- tabs:start -->
+
+#### Python3
+
+```python
+class Solution:
+    def smallestNumber(self, num: str, t: int) -> str:
+        digit_primes = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [2, 0, 0, 0],
+            [0, 0, 1, 0],
+            [1, 1, 0, 0],
+            [0, 0, 0, 1],
+            [3, 0, 0, 0],
+            [0, 2, 0, 0],
+        ]
+
+        def factorize(target: int):
+            counts = [0, 0, 0, 0]
+            for i, p in enumerate((2, 3, 5, 7)):
+                while target % p == 0:
+                    target //= p
+                    counts[i] += 1
+            return counts, target == 1
+
+        def subtract(a, b):
+            return [max(0, x - y) for x, y in zip(a, b)]
+
+        def to_digits(primes):
+            count8 = primes[0] // 3
+            remaining2 = primes[0] % 3
+            count9 = primes[1] // 2
+            count3 = primes[1] % 2
+            count4 = remaining2 // 2
+            count2 = remaining2 % 2
+            count6 = 0
+            if count2 == 1 and count3 == 1:
+                count2 = count3 = 0
+                count6 = 1
+            if count3 == 1 and count4 == 1:
+                count2 = 1
+                count6 = 1
+                count3 = count4 = 0
+            return [
+                0,
+                0,
+                count2,
+                count3,
+                count4,
+                primes[2],
+                count6,
+                primes[3],
+                count8,
+                count9,
+            ]
+
+        def construct(digits) -> str:
+            return "".join(str(d) * digits[d] for d in range(2, 10))
+
+        required, ok = factorize(t)
+        if not ok:
+            return "-1"
+        need = to_digits(required)
+        if sum(need) > len(num):
+            return construct(need)
+
+        prefix = [0, 0, 0, 0]
+        for ch in num:
+            d = ord(ch) - 48
+            for i in range(4):
+                prefix[i] += digit_primes[d][i]
+        first_zero = num.find("0")
+        if first_zero == -1:
+            first_zero = len(num)
+            if all(r <= p for r, p in zip(required, prefix)):
+                return num
+
+        n = len(num)
+        for i in range(n - 1, -1, -1):
+            d = ord(num[i]) - 48
+            prefix = subtract(prefix, digit_primes[d])
+            space = n - 1 - i
+            if i > first_zero:
+                continue
+            for bigger in range(d + 1, 10):
+                suffix = to_digits(
+                    subtract(subtract(required, prefix), digit_primes[bigger])
+                )
+                if sum(suffix) <= space:
+                    return (
+                        num[:i]
+                        + str(bigger)
+                        + "1" * (space - sum(suffix))
+                        + construct(suffix)
+                    )
+        ext = to_digits(required)
+        return "1" * (n + 1 - sum(ext)) + construct(ext)
+```
+
+#### Java
+
+```java
+class Solution {
+    private static final int[][] DIGIT_PRIMES = {
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {2, 0, 0, 0},
+        {0, 0, 1, 0},
+        {1, 1, 0, 0},
+        {0, 0, 0, 1},
+        {3, 0, 0, 0},
+        {0, 2, 0, 0},
+    };
+
+    public String smallestNumber(String num, long t) {
+        int[] required = new int[4];
+        if (!factorize(t, required)) {
+            return "-1";
+        }
+        int[] need = toDigits(required);
+        if (sum(need) > num.length()) {
+            return construct(need);
+        }
+
+        int[] prefix = new int[4];
+        for (int i = 0; i < num.length(); ++i) {
+            add(prefix, DIGIT_PRIMES[num.charAt(i) - '0']);
+        }
+        int firstZero = num.indexOf('0');
+        if (firstZero == -1) {
+            firstZero = num.length();
+            if (isSubset(required, prefix)) {
+                return num;
+            }
+        }
+
+        int n = num.length();
+        for (int i = n - 1; i >= 0; --i) {
+            subtractInPlace(prefix, DIGIT_PRIMES[num.charAt(i) - '0']);
+            int space = n - 1 - i;
+            if (i > firstZero) {
+                continue;
+            }
+            for (int bigger = num.charAt(i) - '0' + 1; bigger < 10; ++bigger) {
+                int[] suffix = toDigits(subtract(subtract(required, prefix), DIGIT_PRIMES[bigger]));
+                if (sum(suffix) <= space) {
+                    StringBuilder ans = new StringBuilder();
+                    ans.append(num, 0, i);
+                    ans.append(bigger);
+                    ans.append("1".repeat(space - sum(suffix)));
+                    ans.append(construct(suffix));
+                    return ans.toString();
+                }
+            }
+        }
+        int[] ext = toDigits(required);
+        return "1".repeat(n + 1 - sum(ext)) + construct(ext);
+    }
+
+    private boolean factorize(long t, int[] counts) {
+        int[] primes = {2, 3, 5, 7};
+        for (int i = 0; i < 4; ++i) {
+            while (t % primes[i] == 0) {
+                t /= primes[i];
+                ++counts[i];
+            }
+        }
+        return t == 1;
+    }
+
+    private int[] toDigits(int[] primes) {
+        int count8 = primes[0] / 3;
+        int remaining2 = primes[0] % 3;
+        int count9 = primes[1] / 2;
+        int count3 = primes[1] % 2;
+        int count4 = remaining2 / 2;
+        int count2 = remaining2 % 2;
+        int count6 = 0;
+        if (count2 == 1 && count3 == 1) {
+            count2 = 0;
+            count3 = 0;
+            count6 = 1;
+        }
+        if (count3 == 1 && count4 == 1) {
+            count2 = 1;
+            count6 = 1;
+            count3 = 0;
+            count4 = 0;
+        }
+        return new int[] {
+            0, 0, count2, count3, count4, primes[2], count6, primes[3], count8, count9};
+    }
+
+    private String construct(int[] digits) {
+        StringBuilder sb = new StringBuilder();
+        for (int d = 2; d < 10; ++d) {
+            sb.append(String.valueOf(d).repeat(digits[d]));
+        }
+        return sb.toString();
+    }
+
+    private boolean isSubset(int[] a, int[] b) {
+        for (int i = 0; i < a.length; ++i) {
+            if (b[i] < a[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int[] subtract(int[] a, int[] b) {
+        int[] res = new int[a.length];
+        for (int i = 0; i < a.length; ++i) {
+            res[i] = Math.max(0, a[i] - b[i]);
+        }
+        return res;
+    }
+
+    private void subtractInPlace(int[] a, int[] b) {
+        for (int i = 0; i < a.length; ++i) {
+            a[i] = Math.max(0, a[i] - b[i]);
+        }
+    }
+
+    private void add(int[] a, int[] b) {
+        for (int i = 0; i < a.length; ++i) {
+            a[i] += b[i];
+        }
+    }
+
+    private int sum(int[] a) {
+        int s = 0;
+        for (int v : a) {
+            s += v;
+        }
+        return s;
+    }
+}
+```
+
+#### C++
+
+```cpp
+class Solution {
+public:
+    string smallestNumber(string num, long long t) {
+        int required[4]{};
+        if (!factorize(t, required)) {
+            return "-1";
+        }
+        int need[10]{};
+        toDigits(required, need);
+        if (sum(need, 10) > (int) num.size()) {
+            return construct(need);
+        }
+
+        int prefix[4]{};
+        for (char ch : num) {
+            add(prefix, DIGIT_PRIMES[ch - '0']);
+        }
+        int firstZero = num.find('0');
+        if (firstZero == (int) string::npos) {
+            firstZero = num.size();
+            if (isSubset(required, prefix)) {
+                return num;
+            }
+        }
+
+        int n = num.size();
+        for (int i = n - 1; i >= 0; --i) {
+            subtractInPlace(prefix, DIGIT_PRIMES[num[i] - '0']);
+            int space = n - 1 - i;
+            if (i > firstZero) {
+                continue;
+            }
+            for (int bigger = num[i] - '0' + 1; bigger < 10; ++bigger) {
+                int tmp[4]{}, suffix[10]{};
+                subtract(required, prefix, tmp);
+                subtractInPlace(tmp, DIGIT_PRIMES[bigger]);
+                toDigits(tmp, suffix);
+                if (sum(suffix, 10) <= space) {
+                    return num.substr(0, i) + char('0' + bigger) + string(space - sum(suffix, 10), '1') + construct(suffix);
+                }
+            }
+        }
+        int ext[10]{};
+        toDigits(required, ext);
+        return string(n + 1 - sum(ext, 10), '1') + construct(ext);
+    }
+
+private:
+    static constexpr int DIGIT_PRIMES[10][4] = {
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {1, 0, 0, 0},
+        {0, 1, 0, 0},
+        {2, 0, 0, 0},
+        {0, 0, 1, 0},
+        {1, 1, 0, 0},
+        {0, 0, 0, 1},
+        {3, 0, 0, 0},
+        {0, 2, 0, 0},
+    };
+
+    bool factorize(long long t, int counts[4]) {
+        int primes[4] = {2, 3, 5, 7};
+        for (int i = 0; i < 4; ++i) {
+            while (t % primes[i] == 0) {
+                t /= primes[i];
+                ++counts[i];
+            }
+        }
+        return t == 1;
+    }
+
+    void toDigits(const int primes[4], int digits[10]) {
+        int count8 = primes[0] / 3;
+        int remaining2 = primes[0] % 3;
+        int count9 = primes[1] / 2;
+        int count3 = primes[1] % 2;
+        int count4 = remaining2 / 2;
+        int count2 = remaining2 % 2;
+        int count6 = 0;
+        if (count2 == 1 && count3 == 1) {
+            count2 = 0;
+            count3 = 0;
+            count6 = 1;
+        }
+        if (count3 == 1 && count4 == 1) {
+            count2 = 1;
+            count6 = 1;
+            count3 = 0;
+            count4 = 0;
+        }
+        int vals[10] = {0, 0, count2, count3, count4, primes[2], count6, primes[3], count8, count9};
+        for (int i = 0; i < 10; ++i) {
+            digits[i] = vals[i];
+        }
+    }
+
+    string construct(const int digits[10]) {
+        string res;
+        for (int d = 2; d < 10; ++d) {
+            res.append(digits[d], char('0' + d));
+        }
+        return res;
+    }
+
+    bool isSubset(const int a[4], const int b[4]) {
+        for (int i = 0; i < 4; ++i) {
+            if (b[i] < a[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void subtract(const int a[4], const int b[4], int res[4]) {
+        for (int i = 0; i < 4; ++i) {
+            res[i] = max(0, a[i] - b[i]);
+        }
+    }
+
+    void subtractInPlace(int a[4], const int b[4]) {
+        for (int i = 0; i < 4; ++i) {
+            a[i] = max(0, a[i] - b[i]);
+        }
+    }
+
+    void add(int a[4], const int b[4]) {
+        for (int i = 0; i < 4; ++i) {
+            a[i] += b[i];
+        }
+    }
+
+    int sum(const int* a, int n) {
+        int s = 0;
+        for (int i = 0; i < n; ++i) {
+            s += a[i];
+        }
+        return s;
+    }
+};
+```
+
+#### Go
+
+```go
+func smallestNumber(num string, t int64) string {
+    primeCount, isDivisible := getPrimeCount(t)
+    if !isDivisible {
+        return "-1"
+    }
+
+    factorCount := getFactorCount(primeCount)
+    if sumValues(factorCount) > len(num) {
+        return construct(factorCount)
+    }
+
+    primeCountPrefix := getPrimeCountFromString(num)
+    firstZeroIndex := strings.Index(num, "0")
+    if firstZeroIndex == -1 {
+        firstZeroIndex = len(num)
+        if isSubset(primeCount, primeCountPrefix) {
+            return num
+        }
+    }
+
+    for i := len(num) - 1; i >= 0; i-- {
+        d := int(num[i] - '0')
+        primeCountPrefix = subtract(primeCountPrefix, kFactorCounts[d])
+        spaceAfterThisDigit := len(num) - 1 - i
+        if i > firstZeroIndex {
+            continue
+        }
+        for biggerDigit := d + 1; biggerDigit < 10; biggerDigit++ {
+            factorsAfterReplacement := getFactorCount(
+                subtract(subtract(primeCount, primeCountPrefix), kFactorCounts[biggerDigit]),
+            )
+            if sumValues(factorsAfterReplacement) <= spaceAfterThisDigit {
+                fillOnes := spaceAfterThisDigit - sumValues(factorsAfterReplacement)
+                return num[:i] + strconv.Itoa(biggerDigit) + strings.Repeat("1", fillOnes) + construct(factorsAfterReplacement)
+            }
+        }
+    }
+
+    factorsAfterExtension := getFactorCount(primeCount)
+    return strings.Repeat("1", len(num)+1-sumValues(factorsAfterExtension)) + construct(factorsAfterExtension)
+}
+
+var kFactorCounts = map[int]map[int]int{
+    0: {}, 1: {}, 2: {2: 1}, 3: {3: 1}, 4: {2: 2},
+    5: {5: 1}, 6: {2: 1, 3: 1}, 7: {7: 1}, 8: {2: 3}, 9: {3: 2},
+}
+
+func getPrimeCount(t int64) (map[int]int, bool) {
+    count := map[int]int{2: 0, 3: 0, 5: 0, 7: 0}
+    for _, prime := range []int{2, 3, 5, 7} {
+        for t%int64(prime) == 0 {
+            t /= int64(prime)
+            count[prime]++
+        }
+    }
+    return count, t == 1
+}
+
+func getPrimeCountFromString(num string) map[int]int {
+    count := map[int]int{2: 0, 3: 0, 5: 0, 7: 0}
+    for _, d := range num {
+        for prime, freq := range kFactorCounts[int(d-'0')] {
+            count[prime] += freq
+        }
+    }
+    return count
+}
+
+func getFactorCount(count map[int]int) map[int]int {
+    res := map[int]int{}
+    count8 := count[2] / 3
+    remaining2 := count[2] % 3
+    count9 := count[3] / 2
+    count3 := count[3] % 2
+    count4 := remaining2 / 2
+    count2 := remaining2 % 2
+    count6 := 0
+    if count2 == 1 && count3 == 1 {
+        count2, count3 = 0, 0
+        count6 = 1
+    }
+    if count3 == 1 && count4 == 1 {
+        count2 = 1
+        count6 = 1
+        count3, count4 = 0, 0
+    }
+    res[2] = count2
+    res[3] = count3
+    res[4] = count4
+    res[5] = count[5]
+    res[6] = count6
+    res[7] = count[7]
+    res[8] = count8
+    res[9] = count9
+    return res
+}
+
+func construct(factors map[int]int) string {
+    var res strings.Builder
+    for digit := 2; digit < 10; digit++ {
+        res.WriteString(strings.Repeat(strconv.Itoa(digit), factors[digit]))
+    }
+    return res.String()
+}
+
+func isSubset(a, b map[int]int) bool {
+    for key, value := range a {
+        if b[key] < value {
+            return false
+        }
+    }
+    return true
+}
+
+func subtract(a, b map[int]int) map[int]int {
+    res := make(map[int]int, len(a))
+    for k, v := range a {
+        res[k] = v
+    }
+    for k, v := range b {
+        res[k] = max(0, res[k]-v)
+    }
+    return res
+}
+
+func sumValues(count map[int]int) int {
+    sum := 0
+    for _, v := range count {
+        sum += v
+    }
+    return sum
+}
+```
+
+#### Rust
+
+```rust
+impl Solution {
+    const DIGIT_PRIME_COUNTS: [[i32; 4]; 10] = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [2, 0, 0, 0],
+        [0, 0, 1, 0],
+        [1, 1, 0, 0],
+        [0, 0, 0, 1],
+        [3, 0, 0, 0],
+        [0, 2, 0, 0],
+    ];
+
+    pub fn smallest_number(num: String, t: i64) -> String {
+        let (required_prime_counts, has_valid_prime_factors) = Self::factorize_target(t);
+        if !has_valid_prime_factors {
+            return "-1".to_string();
+        }
+        let required_digit_counts = Self::prime_counts_to_digits(&required_prime_counts);
+        if Self::digit_count(&required_digit_counts) > num.len() as i32 {
+            let mut result = String::with_capacity(num.len());
+            Self::append_digits(&required_digit_counts, &mut result);
+            return result;
+        }
+        let mut prefix_prime_counts = Self::count_primes_in_number(&num);
+        let mut first_zero_index = num.find('0');
+        if first_zero_index.is_none() {
+            first_zero_index = Some(num.len());
+            if required_prime_counts
+                .iter()
+                .zip(prefix_prime_counts.iter())
+                .all(|(required, available)| required <= available)
+            {
+                return num;
+            }
+        }
+        let length = num.len();
+        for index in (0..length).rev() {
+            let digit = num.as_bytes()[index] - b'0';
+            prefix_prime_counts = Self::subtract_counts(
+                prefix_prime_counts,
+                Self::DIGIT_PRIME_COUNTS[digit as usize],
+            );
+            let suffix_length = length - 1 - index;
+            if index > first_zero_index.unwrap() {
+                continue;
+            }
+            for bigger_digit in digit as i32 + 1..10 {
+                let suffix_digit_counts = Self::prime_counts_to_digits(&Self::subtract_counts(
+                    Self::subtract_counts(required_prime_counts, prefix_prime_counts),
+                    Self::DIGIT_PRIME_COUNTS[bigger_digit as usize],
+                ));
+                if Self::digit_count(&suffix_digit_counts) <= suffix_length as i32 {
+                    let ones_count = suffix_length as i32 - Self::digit_count(&suffix_digit_counts);
+                    let mut result = String::with_capacity(length + 1);
+                    result.push_str(&num[..index]);
+                    result.push((b'0' + bigger_digit as u8) as char);
+                    result.extend(std::iter::repeat('1').take(ones_count as usize));
+                    Self::append_digits(&suffix_digit_counts, &mut result);
+                    return result;
+                }
+            }
+        }
+        let extended_digit_counts = Self::prime_counts_to_digits(&required_prime_counts);
+        let mut result = String::with_capacity(length + 1);
+        result.extend(
+            std::iter::repeat('1')
+                .take(length + 1 - Self::digit_count(&extended_digit_counts) as usize),
+        );
+        Self::append_digits(&extended_digit_counts, &mut result);
+        result
+    }
+
+    fn factorize_target(mut target: i64) -> ([i32; 4], bool) {
+        let mut prime_counts = [0; 4];
+        for (index, prime) in [2i64, 3, 5, 7].iter().enumerate() {
+            while target % prime == 0 {
+                target /= prime;
+                prime_counts[index] += 1;
+            }
+        }
+        (prime_counts, target == 1)
+    }
+
+    fn count_primes_in_number(num: &str) -> [i32; 4] {
+        let mut prime_counts = [0; 4];
+        for byte in num.bytes() {
+            for index in 0..4 {
+                prime_counts[index] += Self::DIGIT_PRIME_COUNTS[(byte - b'0') as usize][index];
+            }
+        }
+        prime_counts
+    }
+
+    fn prime_counts_to_digits(prime_counts: &[i32; 4]) -> [i32; 10] {
+        let count_8 = prime_counts[0] / 3;
+        let remaining_2 = prime_counts[0] % 3;
+        let count_9 = prime_counts[1] / 2;
+        let mut count_3 = prime_counts[1] % 2;
+        let mut count_4 = remaining_2 / 2;
+        let mut count_2 = remaining_2 % 2;
+        let mut count_6 = 0;
+        if count_2 == 1 && count_3 == 1 {
+            count_2 = 0;
+            count_3 = 0;
+            count_6 = 1;
+        }
+        if count_3 == 1 && count_4 == 1 {
+            count_2 = 1;
+            count_6 = 1;
+            count_3 = 0;
+            count_4 = 0;
+        }
+        [
+            0,
+            0,
+            count_2,
+            count_3,
+            count_4,
+            prime_counts[2],
+            count_6,
+            prime_counts[3],
+            count_8,
+            count_9,
+        ]
+    }
+
+    fn append_digits(digit_counts: &[i32; 10], result: &mut String) {
+        for digit in 2..10 {
+            for _ in 0..digit_counts[digit] {
+                result.push((b'0' + digit as u8) as char);
+            }
+        }
+    }
+
+    fn digit_count(digit_counts: &[i32; 10]) -> i32 {
+        digit_counts.iter().sum()
+    }
+
+    fn subtract_counts(mut counts: [i32; 4], subtrahend: [i32; 4]) -> [i32; 4] {
+        for index in 0..4 {
+            counts[index] = (counts[index] - subtrahend[index]).max(0);
+        }
+        counts
+    }
+}
+```
+
+<!-- tabs:end -->
+
+<!-- solution:end -->
+
+<!-- problem:end -->
