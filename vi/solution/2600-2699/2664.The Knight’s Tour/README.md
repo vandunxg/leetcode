@@ -70,7 +70,7 @@ tags:
 
 <!-- thinking:end -->
 
-Ta tạo một mảng hai chiều $g$ để ghi lại thứ tự di chuyển của quân mã, ban đầu đặt $g[r][c] = -1$ và tất cả vị trí còn lại cũng được đặt là $-1$. Ngoài ra, ta cần một biến $ok$ để ghi nhận liệu đã tìm được lời giải hay chưa.
+Ta tạo một mảng hai chiều $g$ để ghi lại thứ tự di chuyển của quân mã, ban đầu $g[r][c] = -1$ và mọi vị trí khác cũng được đặt là $-1$. Ngoài ra, ta cần một biến $ok$ để ghi nhận liệu đã tìm được lời giải hay chưa.
 
 Tiếp theo, ta bắt đầu tìm kiếm theo chiều sâu từ $(r, c)$. Mỗi khi tìm kiếm tại vị trí $(i, j)$, trước tiên ta kiểm tra xem $g[i][j]$ có bằng $m \times n - 1$ hay không. Nếu có, nghĩa là ta đã tìm được lời giải, khi đó đặt $ok$ thành `true` rồi trả về. Nếu không, ta liệt kê tám hướng di chuyển có thể có của quân mã đến vị trí $(x, y)$. Nếu $0 \leq x < m$, $0 \leq y < n$ và $g[x][y]=-1$, ta cập nhật $g[x][y]$ thành $g[i][j]+1$ rồi đệ quy tìm kiếm tại vị trí $(x, y)$. Nếu sau lần tìm kiếm đó biến $ok$ là `true`, ta trả về ngay. Ngược lại, đặt lại $g[x][y]$ thành $-1$ và tiếp tục tìm kiếm theo các hướng khác.
 

@@ -18,9 +18,9 @@ tags:
 
 <!-- description:start -->
 
-<p>Bạn có một <code>grid</code> kích thước <code>n x 3</code> và muốn tô mỗi ô của grid bằng đúng một trong ba màu: <strong>Red</strong>, <strong>Yellow,</strong> hoặc <strong>Green</strong>, đồng thời bảo đảm không có hai ô kề nhau nào cùng màu (tức là không có hai ô chung cạnh dọc hoặc ngang nào cùng màu).</p>
+<p>Bạn có một <code>grid</code> có kích thước <code>n x 3</code> và muốn tô mỗi ô bằng đúng một trong ba màu: <strong>Red</strong>, <strong>Yellow,</strong> hoặc <strong>Green</strong>, đồng thời bảo đảm không có hai ô kề nhau nào cùng màu (tức là không có hai ô chung cạnh dọc hoặc ngang nào cùng màu).</p>
 
-<p>Cho <code>n</code> là số hàng của grid, hãy trả về <em>số cách</em> có thể tô grid này. Vì đáp án có thể rất lớn, <strong>bắt buộc phải</strong> tính đáp án modulo <code>10<sup>9</sup> + 7</code>.</p>
+<p>Cho <code>n</code> là số hàng của grid, hãy trả về <em>số cách</em> có thể tô <code>grid</code>. Vì đáp án có thể rất lớn, <strong>bắt buộc phải</strong> tính đáp án modulo <code>10<sup>9</sup> + 7</code>.</p>
 
 <p>&nbsp;</p>
 <p><strong class="example">Ví dụ 1:</strong></p>
@@ -28,7 +28,7 @@ tags:
 <pre>
 <strong>Input:</strong> n = 1
 <strong>Output:</strong> 12
-<strong>Explanation:</strong> Có 12 cách có thể tô grid như hình minh họa.
+<strong>Explanation:</strong> Có 12 cách tô grid như hình minh họa.
 </pre>
 
 <p><strong class="example">Ví dụ 2:</strong></p>
@@ -64,10 +64,10 @@ tags:
 
 <!-- thinking:end -->
 
-Ta phân loại tất cả trạng thái có thể có của mỗi hàng. Theo nguyên lý đối xứng, khi một hàng chỉ có $3$ phần tử, mọi trạng thái hợp lệ được phân loại thành: loại $010$, loại $012$.
+Ta phân loại tất cả trạng thái có thể có của mỗi hàng. Theo tính đối xứng, khi một hàng chỉ có $3$ phần tử, mọi trạng thái hợp lệ đều được phân loại thành loại $010$ hoặc loại $012$.
 
-- Khi trạng thái là loại $010$: Các trạng thái có thể có ở hàng tiếp theo là: $101$, $102$, $121$, $201$, $202$. Có thể tóm tắt $5$ trạng thái này thành $3$ loại $010$ và $2$ loại $012$.
-- Khi trạng thái là loại $012$: Các trạng thái có thể có ở hàng tiếp theo là: $101$, $120$, $121$, $201$. Có thể tóm tắt $4$ trạng thái này thành $2$ loại $010$ và $2$ loại $012$.
+- Khi trạng thái là loại $010$: Các trạng thái có thể có ở hàng tiếp theo là $101$, $102$, $121$, $201$, $202$. Có thể tóm tắt $5$ trạng thái này thành $3$ loại $010$ và $2$ loại $012$.
+- Khi trạng thái là loại $012$: Các trạng thái có thể có ở hàng tiếp theo là $101$, $120$, $121$, $201$. Có thể tóm tắt $4$ trạng thái này thành $2$ loại $010$ và $2$ loại $012$.
 
 Tóm lại, ta có: $newf0 = 3 \times f0 + 2 \times f1$, $newf1 = 2 \times f0 + 2 \times f1$.
 
@@ -202,17 +202,17 @@ impl Solution {
 
 <!-- thinking:end -->
 
-Ta nhận thấy grid chỉ có $3$ cột, nên một hàng có nhiều nhất $3^3=27$ cách tô màu khác nhau.
+Ta nhận thấy grid chỉ có $3$ cột, nên một hàng có nhiều nhất $3^3=27$ cách tô màu.
 
-Vì vậy, ta định nghĩa $f[i][j]$ là số cách trong $i$ hàng đầu tiên, trong đó trạng thái tô màu của hàng thứ $i$ là $j$. Trạng thái $f[i][j]$ được chuyển từ $f[i - 1][k]$, trong đó $k$ là trạng thái tô màu của hàng thứ $i - 1$, đồng thời $k$ và $j$ thỏa mãn yêu cầu các màu kề nhau phải khác nhau. Cụ thể:
+Vì vậy, ta định nghĩa $f[i][j]$ là số cách tô $i$ hàng đầu tiên, trong đó trạng thái tô màu của hàng thứ $i$ là $j$. Trạng thái $f[i][j]$ được chuyển từ $f[i - 1][k]$, trong đó $k$ là trạng thái tô màu của hàng thứ $i - 1$, đồng thời $k$ và $j$ thỏa mãn yêu cầu các màu kề nhau phải khác nhau. Cụ thể:
 
 $$
 f[i][j] = \sum_{k \in \textit{valid}(j)} f[i - 1][k]
 $$
 
-trong đó $\textit{valid}(j)$ biểu diễn tất cả các trạng thái trước đó hợp lệ của trạng thái $j$.
+trong đó $\textit{valid}(j)$ biểu diễn tất cả các trạng thái trước đó hợp lệ với trạng thái $j$.
 
-Đáp án cuối cùng là tổng của $f[n][j]$, trong đó $j$ là bất kỳ trạng thái hợp lệ nào.
+Đáp án cuối cùng là tổng của $f[n][j]$, trong đó $j$ chạy qua mọi trạng thái hợp lệ.
 
 Ta nhận thấy $f[i][j]$ chỉ liên quan đến $f[i - 1][k]$, nên có thể dùng mảng rolling để tối ưu độ phức tạp không gian.
 

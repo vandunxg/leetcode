@@ -84,7 +84,7 @@ tags:
 
 > **Tư duy**
 >
-> Ba giá trị $x$ phải khác nhau và mục tiêu là tổng các giá trị $y$ tương ứng, vì vậy mỗi $x$ nên đóng góp giá trị $y$ lớn nhất của nó. Sắp xếp các cặp theo $y$ giảm dần, lưu các $x$ đã dùng vào một set, rồi cộng ba giá trị $x$ mới đầu tiên.
+> Ba giá trị $x$ phải khác nhau và mục tiêu là tổng các giá trị $y$ tương ứng, vì vậy mỗi $x$ nên đóng góp giá trị $y$ lớn nhất của nó. Sắp xếp các cặp theo $y$ giảm dần, lưu các $x$ đã dùng vào một set, rồi cộng các giá trị $y$ tương ứng với ba giá trị $x$ mới đầu tiên.
 >
 > Nếu có ít hơn ba giá trị $x$ khác nhau, trả về $-1$. Chỉ cần một lần sắp xếp và một lần duyệt.
 
@@ -92,7 +92,7 @@ tags:
 
 Ta ghép các phần tử của hai mảng $x$ và $y$ thành một mảng hai chiều $\textit{arr}$, sau đó sắp xếp $\textit{arr}$ theo giá trị $y$ giảm dần. Tiếp theo, ta dùng một hash table để lưu các giá trị $x$ đã được chọn, rồi duyệt qua $\textit{arr}$ và mỗi lần chọn một giá trị $x$ cùng giá trị $y$ tương ứng chưa được chọn, cho đến khi chọn đủ ba giá trị $x$ khác nhau.
 
-Nếu chọn được ba giá trị $x$ khác nhau trong quá trình duyệt, ta trả về tổng của ba giá trị $y$ tương ứng; nếu duyệt hết mà vẫn chưa chọn đủ ba giá trị $x$ khác nhau, ta trả về -1.
+Nếu chọn được ba giá trị $x$ khác nhau trong quá trình duyệt, ta trả về tổng của ba giá trị y tương ứng; nếu duyệt hết mà vẫn chưa chọn đủ ba giá trị $x$ khác nhau, ta trả về -1.
 
 Độ phức tạp thời gian là $O(n \times \log n)$, còn độ phức tạp không gian là $O(n)$, trong đó $n$ là độ dài của hai mảng $\textit{x}$ và $\textit{y}$.
 

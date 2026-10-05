@@ -57,7 +57,7 @@ Trong phép duyệt preorder, đầu tiên ta thăm node 0, sau đó thực hi�
 	<li><code>nodes[i].length == 2</code></li>
 	<li><code>0 &lt;= nodes[i][0] &lt;= 10<sup>5</sup></code></li>
 	<li><code>-1 &lt;= nodes[i][1] &lt;= 10<sup>5</sup></code></li>
-	<li>Input được tạo sao cho <code>nodes</code> tạo thành một cây nhị phân.</li>
+	<li>Dữ liệu đầu vào được tạo sao cho <code>nodes</code> tạo thành một cây nhị phân.</li>
 </ul>
 
 <!-- description:end -->
